@@ -1,0 +1,18 @@
+
+```{r}
+# EXERCISE 2
+hemo_data <- read.table("./hemoglobin-1.txt", header = TRUE)
+
+n_fishes <- nrow(hemo_data)
+methods <- unique(hemo_data$method)
+rates <- unique(hemo_data$rate)
+
+combinations <- expand.grid(methods=methods, rates=rates)
+block <- xtabs(formula = hemoglobin~method+rate, data = hemo_data)
+
+attach(hemo_data)
+par(mfrow=c(1,2))
+interaction.plot(method, rate, hemoglobin)
+interaction.plot(rate, method, hemoglobin)
+anova(lm(hemoglobin~method*rate))
+```
