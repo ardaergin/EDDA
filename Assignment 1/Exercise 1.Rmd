@@ -16,6 +16,7 @@ mu <- mean(data$video)
 hist(data$video)
 qqnorm(data$video)
 plot(density(data$video))
+boxplot(data$video)
 ```
 
 Next we calculate .97 confidence interval for the video data.
@@ -67,8 +68,11 @@ larger_median <- sum(data$video > test_median)
 sign_result <- binom.test(larger_median, n, conf.level = .97, alternative = 'greater')
 # WILCOXON TEST
 wilcox_result <- wilcox.test(data$video, mu=50, alternative = 'greater')
+
+
 # TEST FOR 25% results less than 42
 wilcox_25_result <- wilcox.test(data$video, mu=42, alternative = 'less') # not sure if this one is correct
+
 count_lt_42 <- sum(data$video < 42)
 # both should be the same tests
 sign_25_result <- binom.test(count_lt_42, n, p = 0.25, alternative = "less")
@@ -86,9 +90,8 @@ for (i in 1:b2_count) {
 }
 ```
 
-
-```{r}
 # E)
+```{r}
 vid_female <- data$video[data$female==1]
 vid_male <- data$video[data$female==0]
 
@@ -102,9 +105,8 @@ mf_wilcox_result <- wilcox.test(vid_male, vid_female, alternative = 'greater')
 # from normal distribution, here our goal is to check if mean of one sample is indeed higher than a mean
 # of a second sample.
 mf_ks_result <- ks.test(vid_male, vid_female, alternative = 'greater')
+mf_t_result; mf_wilcox_result; mf_ks_result
 ```
-
-
 
 ```{r}
 # F)
@@ -112,4 +114,7 @@ video_puzzle <- data[c('video', 'puzzle')]
 cor_result <- round(cor(video_puzzle), 3)
 pairs(video_puzzle)
 cor_test_result <- cor.test(video_puzzle$video, video_puzzle$puzzle)
+t_result <- t.test(video_puzzle$puzzle, video_puzzle$video, alternative = 'greater', paired = TRUE)
+#t_result <- t.test(video_puzzle$puzzle, video_puzzle$video)
+cor_result; t_result
 ```

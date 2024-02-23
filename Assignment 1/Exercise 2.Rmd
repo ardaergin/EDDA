@@ -1,16 +1,26 @@
+---
+title: "Exercise 2"
+author: "Adam Sulak, Onder Akacik"
+date: "2024-02-22"
+output: html_document
+---
 
-A
+Load data
+
+## A
 ```{r}
+hemoglobin_data <- read.table("hemoglobin-1.txt", header = TRUE)
+
 # Define the factors and their levels
-rates <- 1:4 # Rates 1 to 4
-methods <- c("A", "B") # Methods A and B
+rates <- unique(hemoglobin_data$rate) # Rates 1 to 4
+methods <- unique(hemo_data$method)   # Methods A and B
 
 # Create all combinations of rate and method
 combinations <- expand.grid(rate = rates, method = methods)
 
 # Assign fishes to each combination
 set.seed(123) # For reproducibility
-fish_ids <- 1:80
+fish_ids <- 1:nrow(hemoglobin_data)
 assignments <- sample(fish_ids, length(fish_ids), replace = FALSE)
 combinations$fish_ids <- split(assignments, f = rep(1:nrow(combinations), each = length(assignments)/nrow(combinations)))
 
@@ -20,9 +30,16 @@ print(combinations$fish_ids)
 
 ```
 
-B 
+## B 
 ```{r}
-hemoglobin_data <- read.table("hemoglobin-1.txt", header = TRUE)
+
+attach(hemoglobin_data)
+par(mfrow=c(1,2))
+interaction.plot(method, rate, hemoglobin)
+interaction.plot(rate, method, hemoglobin)
+hemo_result <- anova(lm(hemoglobin~method*rate))
+detach(hemoglobin_data)
+#block <- xtabs(hemoglobin_data)
 
 hemoglobin_data$rate <- as.factor(hemoglobin_data$rate)
 hemoglobin_data$method <- as.factor(hemoglobin_data$method)
@@ -35,7 +52,7 @@ anova_result
 (rate is stat.ly significant. method and the interaction effect are not stat.ly significant)
 
 
-C
+## C
 The rate of sulfamerazine has the greatest influence on hemoglobing levels among two that were tested. It has a statistically significant effect.
 This question is a good starting point for understanding the effects of different variables on a response. 
 ```{r}
@@ -58,7 +75,7 @@ print(sorted_means)
 ```
 
 
-D
+## D
 Performing this test is useful to understand the effect of the rate variable alone on hemoglobin levels, but it's important to remember that ignoring other variables (like the method in this case) might oversimplify the model and overlook potential interaction effects.
 The rate of sulfamerazine does have a significant effect on hemoglobin levels, so the null hypothesis is rejected. (?)
 Estimated hemoglobin values for each rate are Rate1	6.975, Rate2	9.735, Rate3	9.380, and Rate4	8.855.
@@ -73,4 +90,6 @@ print(anova_result_one_way)
 mean_hemoglobin_by_rate <- aggregate(hemoglobin ~ rate, data = hemoglobin_data, FUN = mean)
 print(mean_hemoglobin_by_rate)
 
+kruskal_result <- kruskal.test(hemoglobin_data$hemoglobin, hemoglobin_data$rate)
+print(kruskal_result)
 ```
