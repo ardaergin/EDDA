@@ -1,18 +1,76 @@
 
+A
 ```{r}
-# EXERCISE 2
-hemo_data <- read.table("./hemoglobin-1.txt", header = TRUE)
+# Define the factors and their levels
+rates <- 1:4 # Rates 1 to 4
+methods <- c("A", "B") # Methods A and B
 
-n_fishes <- nrow(hemo_data)
-methods <- unique(hemo_data$method)
-rates <- unique(hemo_data$rate)
+# Create all combinations of rate and method
+combinations <- expand.grid(rate = rates, method = methods)
 
-combinations <- expand.grid(methods=methods, rates=rates)
-block <- xtabs(formula = hemoglobin~method+rate, data = hemo_data)
+# Assign fishes to each combination
+set.seed(123) # For reproducibility
+fish_ids <- 1:80
+assignments <- sample(fish_ids, length(fish_ids), replace = FALSE)
+combinations$fish_ids <- split(assignments, f = rep(1:nrow(combinations), each = length(assignments)/nrow(combinations)))
 
-attach(hemo_data)
-par(mfrow=c(1,2))
-interaction.plot(method, rate, hemoglobin)
-interaction.plot(rate, method, hemoglobin)
-anova(lm(hemoglobin~method*rate))
+# View the assignments
+print(combinations)
+print(combinations$fish_ids)
+
+```
+
+B 
+```{r}
+hemoglobin_data <- read.table("hemoglobin-1.txt", header = TRUE)
+
+hemoglobin_data$rate <- as.factor(hemoglobin_data$rate)
+hemoglobin_data$method <- as.factor(hemoglobin_data$method)
+
+anova_result <- anova(lm(hemoglobin ~ rate * method, data = hemoglobin_data))
+anova_result
+
+
+```
+(rate is stat.ly significant. method and the interaction effect are not stat.ly significant)
+
+
+C
+The rate of sulfamerazine has the greatest influence on hemoglobing levels among two that were tested. It has a statistically significant effect.
+This question is a good starting point for understanding the effects of different variables on a response. 
+```{r}
+# additive model
+anova_result <- anova(lm(hemoglobin ~ rate + method, data = hemoglobin_data))
+anova_result
+
+```
+
+Combination: rate:2 and method:B yielded the highest hemoglobin.
+Mean value for rate:3 and method:A can be used as the estimate of that combination, which leads to the value of 9.03.
+Rate 2 leads to the highest mean hemoglobin as it can be seen from the printed sorted means per combination. Rate 3 is the second and Rate 4 is the third and Rate 1 is the fourth.
+```{r}
+mean_hemoglobin_by_combination <- aggregate(hemoglobin ~ rate + method, data = hemoglobin_data, FUN = mean)
+
+sorted_means <- mean_hemoglobin_by_combination[order(-mean_hemoglobin_by_combination$hemoglobin), ]
+
+print(sorted_means)
+
+```
+
+
+D
+Performing this test is useful to understand the effect of the rate variable alone on hemoglobin levels, but it's important to remember that ignoring other variables (like the method in this case) might oversimplify the model and overlook potential interaction effects.
+The rate of sulfamerazine does have a significant effect on hemoglobin levels, so the null hypothesis is rejected. (?)
+Estimated hemoglobin values for each rate are Rate1	6.975, Rate2	9.735, Rate3	9.380, and Rate4	8.855.
+Performing this test is useful to understand the effect of the rate variable alone on hemoglobin levels, but it's important to remember that ignoring other variables (like the method in this case) might oversimplify the model and overlook potential interaction effects.
+```{r}
+
+hemoglobin_data$rate <- as.factor(hemoglobin_data$rate)
+
+anova_result_one_way <- anova(lm(hemoglobin ~ rate, data = hemoglobin_data))
+print(anova_result_one_way)
+
+mean_hemoglobin_by_rate <- aggregate(hemoglobin ~ rate, data = hemoglobin_data, FUN = mean)
+print(mean_hemoglobin_by_rate)
+
 ```
