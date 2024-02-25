@@ -11,7 +11,8 @@ We first load `Ice_cream-1.csv`.
 data <- read.table("./Ice_cream-1.csv", header = TRUE, sep = ",")
 ```
 
-We then proceed with confirming normality assumption.
+We then proceed with confirming normality assumption. The qqplot and histogram show us that data is
+normaly distributed.
 ```{r}
 mu <- mean(data$video)
 hist(data$video)
@@ -29,14 +30,17 @@ z_score <- qnorm(1 - 0.015)
 margin_error <- z_score * sem
 lower_bound <- mu - margin_error
 upper_bound <- mu + margin_error
+lower_bound; upper_bound
 ```
 
 Then we proceed with calculating interval length<=3 (Answer: 205.17)
 ```{r}
 n_min = (z_score^2) * (sd_sample^2) / (1.5^2)
+n_min
 ```
 
-After than we calculate confidence interval using bootstraping:
+After than we calculate confidence interval using bootstraping. We take 10 000 boostrap samples to get a good
+approximation.
 ```{r}
 # BOOTSTRAP 97% CONFIDENCE INTERVAL
 b_count <- 10000
@@ -51,35 +55,52 @@ boxplot(bootstrap_stat)
 bootstrap_conf_int <- quantile(bootstrap_stat, c(0.015, 0.985))
 s <- sum(bootstrap_stat<bootstrap_conf_int[1])
 bootstrap_conf_int_check <- c(2*mu-bootstrap_conf_int[2] ,2*mu-bootstrap_conf_int[1])
+bootstrap_conf_int
 ```
 ## Question B)
-T test
-
+We use one-sample T-test to check if mean score is larger than 50.
 ```{r}
 t_test_result <- t.test(data$video, mu = 50, alternative = "greater")
+t_test_result
 ```
+Since we are interested in a score that is _greater_ than 50 we perform one-tailed test. in such test
+we reject Null hypothesis when tested mean (not sample mean!) is so low that is is outside of the confidence interval. In one-tailed test such confidence interval will span some real value for the lower bound and infinity in the upper bound. When value of the mean is lower that the lower bound of this Confidence Interval then we can say with high confidence that mean of population is lower than the tested mean. In this test we **reject Null hypothesis**
+
+```{r}
+t_test51_result <- t.test(data$video, mu = 51, alternative = "greater")
+t_test51_result
+```
+For the test with mean equal to 51 we have the same CI but result of the test is different.
+Real mean of the sample is 51.85 which is higher than that tested mean of 51. However that tested mean is still
+within confidence interval so we cannot be sure with high certainty that actual population mean is higher. The p-value
+is equal to 0.113 which exceed 0.05 threshold.
+
+
 ## Question C)
+First we run sign and Wilcoxon test to check if median score of video game is larger than 50.
 ```{r}
 # SIGN TEST
 test_median <- 50
 larger_median <- sum(data$video > test_median)
 sign_result <- binom.test(larger_median, n, conf.level = .97, alternative = 'greater')
-# WILCOXON TEST
+
 wilcox_result <- wilcox.test(data$video, mu=50, alternative = 'greater')
-
-
-# TEST FOR 25% results less than 42
-wilcox_25_result <- wilcox.test(data$video, mu=42, alternative = 'less') # not sure if this one is correct
+sign_result, wilcox_result
+```
+Next we perform sign test with modified parameters to check if 25 % of results are less than 42.
+```{r}
+#wilcox_25_result <- wilcox.test(data$video, mu=42, alternative = 'less') # not sure if this one is correct
 
 count_lt_42 <- sum(data$video < 42)
+
 # both should be the same tests
 sign_25_result <- binom.test(count_lt_42, n, p = 0.25, alternative = "less")
-prop_25_result <- prop.test(x = count_lt_42, n = n, p = 0.25, alternative = "less")
+#prop_25_result <- prop.test(x = count_lt_42, n = n, p = 0.25, alternative = "less")
+sign_25_result
 ```
 
 ## Question D)
 ```{r}
-# D) *
 b2_count <- 10000
 b2_stat <- numeric(b2_count)
 for (i in 1:b2_count) {
@@ -102,7 +123,7 @@ mf_ks_result <- ks.test(vid_male, vid_female, alternative = 'greater')
 
 mf_t_result; mf_wilcox_result; mf_ks_result
 ```
-Wlcoxon test compares medians of two samples not means, hovever it can still give us a good idea about the differences between samples.
+Wlcoxon test compares medians of two samples not means, however it can still give us a good idea about the differences between samples.
 
 Kolmogorov-Smirnov test is used to check if two samples come from the same distribution or if one sample comes
 from normal distribution, here our goal is to check if mean of one sample is higher than a mean
