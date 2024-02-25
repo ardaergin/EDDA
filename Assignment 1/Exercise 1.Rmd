@@ -85,7 +85,7 @@ larger_median <- sum(data$video > test_median)
 sign_result <- binom.test(larger_median, n, conf.level = .97, alternative = 'greater')
 
 wilcox_result <- wilcox.test(data$video, mu=50, alternative = 'greater')
-sign_result, wilcox_result
+sign_result; wilcox_result
 ```
 Next we perform sign test with modified parameters to check if 25 % of results are less than 42.
 ```{r}
@@ -130,6 +130,7 @@ from normal distribution, here our goal is to check if mean of one sample is hig
 of a second sample which means KS test is incorrect test to perform.
 
 ## Question F)
+We run Pearson correlation test.
 ```{r}
 video_puzzle <- data[c('video', 'puzzle')]
 cor_result <- round(cor(video_puzzle), 3)
@@ -139,3 +140,4 @@ t_result <- t.test(video_puzzle$puzzle, video_puzzle$video, alternative = 'great
 #t_result <- t.test(video_puzzle$puzzle, video_puzzle$video)
 cor_result; t_result
 ```
+The p-value resulting from the test is 0.232 therefore **alternative hypothesis is rejected**.
