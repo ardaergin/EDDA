@@ -6,7 +6,6 @@ output: html_document
 ---
 
 ## A
-
 ```{r}
 # Load data
 hemoglobin_data <- read.table("hemoglobin-1.txt", header = TRUE)
@@ -40,6 +39,8 @@ attach(hemoglobin_data)
 par(mfrow=c(1,2))
 interaction.plot(method, rate, hemoglobin)
 interaction.plot(rate, method, hemoglobin)
+boxplot(hemoglobin~rate)
+boxplot(hemoglobin~method)
 detach(hemoglobin_data)
 
 hemoglobin_data$rate <- as.factor(hemoglobin_data$rate)
@@ -100,8 +101,9 @@ print(mean_hemoglobin_by_rate)
 ## E
 A non-parametric alternative to one-way ANOVA is Kruskal-Wallis test. We run the test with command
 below to to compare output with results from section D.
-
 ```{r}
 kruskal_result <- kruskal.test(hemoglobin_data$hemoglobin, hemoglobin_data$rate)
 print(kruskal_result)
 ```
+The results of Kruskal-Wallis test are consistent with those from section D. We clearly see that hemoglobin levels are
+affected by the rate factor. The p-value is equal to 1.777e-07 which mean **Null hypothesis is rejected** again.
