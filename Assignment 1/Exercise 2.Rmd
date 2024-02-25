@@ -2,10 +2,12 @@
 title: "Exercise 2"
 author: "Adam Sulak, Onder Akacik"
 date: "2024-02-22"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-## A
+## Question A)
 ```{r}
 # Load data
 hemoglobin_data <- read.table("hemoglobin-1.txt", header = TRUE)
@@ -29,7 +31,7 @@ print(combinations$fish_ids)
 
 ```
 
-## B
+## Question B)
 
 rate is statistically significant. method and the interaction effect are not statistically significant.
 
@@ -52,7 +54,7 @@ anova_result
 
 ```
 
-## C
+## Question C)
 
 The **rate** of sulfamerazine has the greatest influence on hemoglobin levels among two that were tested. It has a statistically significant effect. This question is a good starting point for understanding the effects of different variables on a response.
 
@@ -78,7 +80,7 @@ print(sorted_means)
 
 ```
 
-## D
+## Question D)
 
 Performing this test is useful to understand the effect of the rate variable alone on hemoglobin levels, but it's important to remember that ignoring other variables (like the method in this case) might oversimplify the model and overlook potential interaction effects.
 
@@ -98,7 +100,7 @@ print(mean_hemoglobin_by_rate)
 
 ```
 
-## E
+## Question E)
 A non-parametric alternative to one-way ANOVA is Kruskal-Wallis test. We run the test with command
 below to to compare output with results from section D.
 ```{r}

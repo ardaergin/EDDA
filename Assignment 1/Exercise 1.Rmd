@@ -5,6 +5,7 @@ date: "2024-02-22"
 output: html_document
 ---
 
+## Question A)
 We first load `Ice_cream-1.csv`.
 ```{r}
 data <- read.table("./Ice_cream-1.csv", header = TRUE, sep = ",")
@@ -51,17 +52,14 @@ bootstrap_conf_int <- quantile(bootstrap_stat, c(0.015, 0.985))
 s <- sum(bootstrap_stat<bootstrap_conf_int[1])
 bootstrap_conf_int_check <- c(2*mu-bootstrap_conf_int[2] ,2*mu-bootstrap_conf_int[1])
 ```
-
+## Question B)
 T test
 
 ```{r}
-# B)
 t_test_result <- t.test(data$video, mu = 50, alternative = "greater")
 ```
-
+## Question C)
 ```{r}
-
-# C)
 # SIGN TEST
 test_median <- 50
 larger_median <- sum(data$video > test_median)
@@ -79,7 +77,7 @@ sign_25_result <- binom.test(count_lt_42, n, p = 0.25, alternative = "less")
 prop_25_result <- prop.test(x = count_lt_42, n = n, p = 0.25, alternative = "less")
 ```
 
-
+## Question D)
 ```{r}
 # D) *
 b2_count <- 10000
@@ -90,7 +88,7 @@ for (i in 1:b2_count) {
 }
 ```
 
-# E)
+## Question E)
 ```{r}
 vid_female <- data$video[data$female==1]
 vid_male <- data$video[data$female==0]
@@ -108,8 +106,8 @@ mf_ks_result <- ks.test(vid_male, vid_female, alternative = 'greater')
 mf_t_result; mf_wilcox_result; mf_ks_result
 ```
 
+## Question F)
 ```{r}
-# F)
 video_puzzle <- data[c('video', 'puzzle')]
 cor_result <- round(cor(video_puzzle), 3)
 pairs(video_puzzle)
