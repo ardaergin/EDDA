@@ -5,11 +5,10 @@ date: "2024-02-22"
 output: html_document
 ---
 
-Load data
-
 ## A
 
 ```{r}
+# Load data
 hemoglobin_data <- read.table("hemoglobin-1.txt", header = TRUE)
 
 # Define the factors and their levels
@@ -99,9 +98,8 @@ print(mean_hemoglobin_by_rate)
 ```
 
 ## E
-
-**TODO: EXPLAIN IF KRUSKAL ARRIVES THE SAME CONCLUSION\
-TODO: EXPLAIN POSSIBLE DIFFERENCES IN BETWEEN**
+A non-parametric alternative to one-way ANOVA is Kruskal-Wallis test. We run the test with command
+below to to compare output with results from section D.
 
 ```{r}
 kruskal_result <- kruskal.test(hemoglobin_data$hemoglobin, hemoglobin_data$rate)
