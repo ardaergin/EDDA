@@ -89,22 +89,24 @@ for (i in 1:b2_count) {
 ```
 
 ## Question E)
+
+Since we know that sample comes from normal distribution two sample t test is a most suitable test to perform.
+We also perform Wilcoxon and Kolmogorov-Smirnov test and explain below the caveats.
 ```{r}
 vid_female <- data$video[data$female==1]
 vid_male <- data$video[data$female==0]
 
-# since we know that sample comes from normal distribution two sample t test is a suitable test to perform
 mf_t_result <- t.test(vid_male, vid_female, alternative = 'greater')
-# Wlcoxon test compares medians of two samples not means, but it can still give good idea of
-# differences between samples
 mf_wilcox_result <- wilcox.test(vid_male, vid_female, alternative = 'greater')
-# This one is not suitable for our sample, need to justify why
-# Kolmogorov test is used to check if two samples come from the same distribution or if one sample comes
-# from normal distribution, here our goal is to check if mean of one sample is indeed higher than a mean
-# of a second sample.
 mf_ks_result <- ks.test(vid_male, vid_female, alternative = 'greater')
+
 mf_t_result; mf_wilcox_result; mf_ks_result
 ```
+Wlcoxon test compares medians of two samples not means, hovever it can still give us a good idea about the differences between samples.
+
+Kolmogorov-Smirnov test is used to check if two samples come from the same distribution or if one sample comes
+from normal distribution, here our goal is to check if mean of one sample is higher than a mean
+of a second sample which means KS test is incorrect test to perform.
 
 ## Question F)
 ```{r}
