@@ -1,122 +1,101 @@
 ---
 title: "Exercise 1"
-author: "Adam Sulak, Onder Akacik"
+author: "Adam Sulak, Onder Akacik, Arda Ergin"
 date: "2024-02-22"
 output:
   pdf_document: default
   html_document: default
 ---
 
+```{r}
+library(ggplot2)
+library(lme4)
+```
+
 # Exercise 1
 
-## Question A)
-
-We first load `Ice_cream-1.csv`.
-
-```{r}
+## Question 1a)
+```{r, echo=FALSE}
 data <- read.table("./Ice_cream-1.csv", header = TRUE, sep = ",")
 ```
 
-We then proceed with confirming normality assumption. The qqplot and histogram show us that data is normally distributed.
-
+After loading `Ice_cream-1.csv`, we first check the **"normality assumption"**. The Normal QQ-plot, density plot, and the histogram indicate that there does not seem to be a serious deviation from normal distribution. The box plot indicate that there seems to be no serious outliers.
 ```{r}
-mu <- mean(data$video)
-par(mfrow=c(1,4))
-hist(data$video)
-plot(density(data$video))
+par(mfrow = c(1,2))
+hist(data$video,main = "Histogram of Video Game Scores", xlab = "Video Game Scores")
 qqnorm(data$video)
-boxplot(data$video)
+par(mfrow = c(1,2))
+boxplot(data$video); plot(density(data$video))
 ```
 
-Next we calculate .97 confidence interval for the video data.
-
+Next we calculate **$97\%$ confidence interval** for the video data:
 ```{r}
-n <- length(data$video)
-sd_sample <- sd(data$video)
-sem <- sd_sample / sqrt(n)
-z_score <- qnorm(1 - 0.015)
-margin_error <- z_score * sem
-lower_bound <- mu - margin_error
-upper_bound <- mu + margin_error
-lower_bound; upper_bound
+mu <- mean(data$video); n <- length(data$video)
+sd_sample <- sd(data$video); sem <- sd_sample / sqrt(n)
+z_score <- qnorm(1 - 0.015); margin_error <- z_score * sem
+lower_bound <- mu - margin_error; upper_bound <- mu + margin_error
 ```
 
-Then we proceed with calculating interval length\<=3 (Answer: 205.17)
-
+Hence, in our given sample, the average video game score is `r round(mu,2)` ($SD$ = `r round(sd_sample,2)`), 97%-CI [`r round(lower_bound,2)`, `r round(upper_bound,2)`]. Then, for the next task:
 ```{r}
 n_min = (z_score^2) * (sd_sample^2) / (1.5^2)
-n_min
 ```
 
-After than we calculate confidence interval using bootstraping. We take 10 000 boostrap samples to get a good approximation.
+Given our sample $SD$ and chosen CI, the "*sample size needed to provide that the length of the 97%-CI is at most 3*" is `r n_min`.          
 
+For the next task, we calculate the confidence interval using **bootstrapping**. We take $1000$ bootstrap samples to get a good approximation.
 ```{r}
-# BOOTSTRAP 97% CONFIDENCE INTERVAL
-b_count <- 10000
-bootstrap_stat <- numeric(b_count)
-for (i in 1:b_count) {
-    bootstrap_sample <- sample(data$video, replace=TRUE)
-    bootstrap_stat[i] <- mean(bootstrap_sample)
+bootstrap_CI <- function(x, b_count){
+  bootstrap_stat <- numeric(1000)
+  for (i in 1:b_count) {
+      bootstrap_sample <- sample(x, replace=TRUE)
+      bootstrap_stat[i] <- mean(bootstrap_sample)
+  }
+  cat("97%-CI Bootstrap Confidence Interval: \n")
+  print(quantile(boot_results, c(0.015, 0.985)))
+  par(mfrow=c(1,2)); hist(boot_results); boxplot(boot_results)
 }
-par(mfrow=c(1,4))
-hist(bootstrap_stat)
-boxplot(bootstrap_stat)
-
-bootstrap_conf_int <- quantile(bootstrap_stat, c(0.015, 0.985))
-s <- sum(bootstrap_stat<bootstrap_conf_int[1])
-bootstrap_conf_int_check <- c(2*mu-bootstrap_conf_int[2] ,2*mu-bootstrap_conf_int[1])
-bootstrap_conf_int
+bootstrap_CI(data$video, 1000)
 ```
 
-## Question B)
 
-We use one-sample T-test to check if mean score is larger than 50.
-
+## Question 1b)
+Since we are investigating whether the mean video game score we observed in our sample is significantly greater than $50$, we use **one-sample T-test**. Hence, our null hypothesis is $H_0: \mu = 50$, and our one-sided alternative hypothesis is $H_1: \mu > 50$.
 ```{r}
-t_test_result <- t.test(
-    data$video,
-    mu = 50,
-    alternative = "greater"
-)
-t_test_result
+t_test_result <- t.test(data$video, mu = 50, alternative = "greater", conf.level = 0.97)
 ```
 
-Since we are interested in a score that is *greater* than 50 we perform one-tailed test. in such test we reject Null hypothesis when tested mean (not sample mean!) is so low that is is outside of the confidence interval. In one-tailed test such confidence interval will span some real value for the lower bound and infinity in the upper bound. When value of the mean is lower that the lower bound of this Confidence Interval then we can say with high confidence that mean of population is lower than the tested mean. In this test we **reject Null hypothesis**
+The results of the analysis shows that our observed sample mean for the video game score, `r mu`, is significantly greater than $50$, $t(199) = 2.64$, $p < 0.01$. Hence, we reject the null hypothesis, and this result provides support for the alternative hypothesis.       
 
+The **CI in the R-output**, which we set to $97\%$ for consistency, show [`r round(unname(t_test_result$conf.int[1]),2)`, `r round(unname(t_test_result$conf.int[2]),2)`]. In a one-sided t-test, because our interest is only in one direction of the effect (i.e., in our case whether our observed sample mean is greater than 50), we get a CI that do not have an upper bound. By the same token, if we investigate `alternative = "less"`, the lower bound we get is `-Inf`. We can also see the significance of the result by noticing that the lower bound of the CI is $> 50$.
 ```{r}
-t_test51_result <- t.test(
-    data$video,
-    mu = 51,
-    alternative = "greater"
-)
-t_test51_result
+t_test_result <- t.test(data$video, mu = 51, alternative = "greater", conf.level = 0.97)
 ```
 
-For the test with mean equal to 51 we have the same CI but result of the test is different. Real mean of the sample is 51.85 which is higher than that tested mean of 51. However that tested mean is still within confidence interval so we cannot be sure with high certainty that actual population mean is higher. The p-value is equal to 0.113 which exceed 0.05 threshold.
+If we investigate $H_0: \mu = 51$, with again a directional $H_1: \mu > 51$, we find that our observed sample mean for the video game score, `r mu`, is not significantly greater than $51$, $t(199) = 1.21$, $p = 0.11$. Hence, in this case, we do not reject the null hypothesis, and the result does not provide support for the alternative hypothesis. We also see this insignificant finding in the CI: We have the same CI as the previous test, but now the lower bound of the CI is $< 51$.
 
-## Question C)
 
-First we run sign and Wilcoxon test to check if median score of video game is larger than 50.
-
+## Question 1c)
 ```{r}
-# SIGN TEST
-test_median <- 50
-larger_median <- sum(data$video > test_median)
+test_median <- 50; larger_median <- sum(data$video > test_median)
+# Sign Test
 sign_result <- binom.test(
-    larger_median, n, 
-    conf.level = .97, 
-    alternative = 'greater'
-)
-
-wilcox_result <- wilcox.test(data$video, mu=test_median, alternative = 'greater')
-sign_result; wilcox_result
+  larger_median, n = n, conf.level = .97, alternative = 'greater')
+# Wilcoxon Signed-rank Test
+wilcox_result_50 <- wilcox.test(
+  data$video, mu = 50, alternative = 'greater', conf.level = .97)
+wilcox_result_51 <- wilcox.test(
+  data$video, mu = 51, alternative = 'greater', conf.level = .97)
 ```
 
-Next we perform sign test with modified parameters to check if 25 % of results are less than 42.
+We conducted a **Sign Test** (or Exact Binomial Test) to test whether the median for the video game scores in our sample is significantly greater than $50$ (or $51$), with $H_0 : p(\text{success}) = 0.5$ and $H_1 : p(\text{success}) > 0.5$. In our sample, the number of "successes", where the score of an individual was higher than the median, was $108$ out of $200$ trials, with $p(\text{success}) = 0.54$. The results of the Sign Test showed that $p(\text{success}) = 0.54$ is not significantly greater than $p(\text{success}) = 0.5$, $p = 0.14$. Therefore, we do not reject $H_0$, and the result does not provide support for $H_1$. We expect the same results for the median $51$, as it is a $H_0$ tougher to reject.
+
+We conducted a **Wilcoxon Signed-rank Test** to test, through matched pairs, whether the median for the video game scores in our sample is significantly greater than $50$ (or $51$), with $H_0 : \text{median(VG-scores)} = 50$ and $H_1 : \text{median(VG-scores)} > 50$. The results of the Wilcoxon Signed-rank Test was significant, $V = 9835.5$, $p < 0.01$. Hence, we can reject the $H_0$, and take it as a support that the median video game score for our sample is greater than $50$. Yet, similar with the one-sample t-test results, when we take $H_0 : \text{median(VG-scores)} = 51$ and $H_1 : \text{median(VG-scores)} > 51$, the results were not significant $V = 11024$, $p = 0.07$. Hence, we cannot reject $H_0$ when $H_0 : \text{median(VG-scores)} = 51$. 
+
+The underlying reason for these differences between the t-test, Sign Test, and Wilcoxon Test can be attributed to the differences in how these tests operate and the assumptions they make. While t-test is a parametric test, Sign Test and Wilcoxon Test are non-parametric, and they do not assume normality. Although, it needs to be noted that the Wilcoxon Test has a symmetry assumption (since it considers "ranks on both sides" of the distribution), making it more sensitive compared to the the Sign Test. In our case, these differences resulted in t-test and Wilcoxon Test giving the same hypothesis testing results, but the Sign Test not giving similar results and making a tougher hypothesis testing as both $H_0$ could not be rejected
 
 ```{r}
 #wilcox_25_result <- wilcox.test(data$video, mu=42, alternative = 'less')
-
 count_lt_42 <- sum(data$video < 42)
 
 # both should be the same tests
@@ -125,18 +104,42 @@ sign_25_result <- binom.test(count_lt_42, n, p = 0.25, alternative = "less")
 sign_25_result
 ```
 
-## Question D)
+We performed the Sign Test with modified parameters to check if the video game scores that are less than $42$ composes at most $25\%$ of the sample, with $H_0 : p(\text{success}) = 0.25$ and $H_1 : p(\text{success}) < 0.25$. The results showed that $p(\text{success}) = 0.16$ is significantly smaller than $p(\text{success}) = 0.25$, $p < 0.001$. Therefore, we do reject $H_0$, and the result does provide support for $H_1$.  
 
+
+## Question 1d)
 ```{r}
-b2_count <- 10000
-b2_stat <- numeric(b2_count)
-for (i in 1:b2_count) {
-    b2_sample <- sample(data$video, replace=TRUE)
-    b2_stat[i] <- min(b2_sample)
+bootstrap_test <- function(n = 200, b_count = 100, mu, test = min(data$video)){
+  bootstrap_stat <- numeric(n)
+  
+  for (i in 1:b_count) {
+      bootstrap_sample <- rnorm(n = n, mean = mu, sd = 10)
+      bootstrap_stat[i] <- min(bootstrap_sample)
+  }
+  
+  pl = sum(boot_results < test)/1000
+  pr = sum(boot_results > test)/1000
+  p_value = 2 * min(pl, pr)
+  
+  if(p_value > 0.05){
+    print(mean)
+  }
+  
+  # if (p_value > 0.05){main_results[i] = 0}
+  # else {main_results[i] = 1}
+  
 }
+
+for(i in 1:100){
+  bootstrap_test(mu = i)
+}
+
+
 ```
 
-## Question E)
+
+
+## Question 1e)
 
 Since we know that sample comes from normal distribution two sample t test is a most suitable test to perform. We also perform Wilcoxon and Kolmogorov-Smirnov test and explain below the caveats.
 
@@ -151,11 +154,11 @@ mf_ks_result <- ks.test(vid_male, vid_female, alternative = 'greater')
 mf_t_result; mf_wilcox_result; mf_ks_result
 ```
 
-Wlcoxon test compares medians of two samples not means, however it can still give us a good idea about the differences between samples.
+Wilcoxon test compares medians of two samples not means, however it can still give us a good idea about the differences between samples.
 
 Kolmogorov-Smirnov test is used to check if two samples come from the same distribution or if one sample comes from normal distribution, here our goal is to check if mean of one sample is higher than a mean of a second sample which means KS test is incorrect test to perform.
 
-## Question F)
+## Question 1f)
 
 We run Pearson correlation test.
 

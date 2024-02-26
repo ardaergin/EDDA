@@ -1,6 +1,6 @@
 ---
 title: "Exercise 2"
-author: "Adam Sulak, Onder Akacik"
+author: "Adam Sulak, Onder Akacik, Arda Ergin"
 date: "2024-02-22"
 output:
   pdf_document: default

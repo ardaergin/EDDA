@@ -1,6 +1,6 @@
 ---
 title: "Exercise 3"
-author: "Arda Ergin"
+author: "Adam Sulak, Onder Akacik, Arda Ergin"
 date: "2024-02-22"
 output:
   pdf_document: default
@@ -11,25 +11,11 @@ output:
 The file `cream.txt` contains data on an experiment to produce sour cream. 
 
 ```{r}
-data <- read.table(
-  "cream.txt",
-  header = TRUE)
+data <- read.table("cream.txt", header = TRUE)
 ```
 
-Yogurt was placed in sweet cream, and yogurt bacteria were allowed to develop. Bacteria produce lactic acid, and as a surrogate for the number of yogurt bacteria, the acidity of the cream was measured. 
 
-Interest was in the **effect of the type of yogurt** (denoted as `starter`) on acidity. 
-
-The mixtures of yogurt and sweet cream were kept at constant temperature in a yogurt maker, in which **five different positions could be used**. 
-
-The experiment was carried out with five batches of sweet cream, which were meant to have the same composition. With each batch each of five types of starter was used, with the yogurt placed in one of the five positions.
-
-The combinations of levels of three factors form a three-dimensional latin square. (You may need to install the R-package lme4, which is not included in the standard distribution of R.)
-
-
-### Question A)
-Analyze the data in a three-way experiment without interactions with acidity as response and starter, batch and position as factors. By using summary command, can you tell whether there is a significant difference between the effects of starter 1 and starter 2 on acidity? Motivate your answer.
-
+## Question 3a)
 ```{r}
 # Factorizing the variables
 data$batch <- factor(data$batch)
@@ -38,8 +24,7 @@ data$starter <- factor(data$starter)
 
 # Linear Modelling
 model <- stats::lm(
-  acidity ~ batch + position + starter, 
-  data = data)
+  acidity ~ batch + position + starter, data = data)
 summary(model)
 ```
 
@@ -52,7 +37,7 @@ And the results of the analysis shows that, there is no significant difference b
 
 
 
-## Question B)
+## Question 1b)
 b)  Recall that the main interest is in the effect of starter on acidity; factors `position` and `batch` represent the block variables. Remove insignificant block variable(s) if there are such, and perform an ANOVA for the resulting “fixed effects” model. Which starter(s) lead to significantly different acidity? Motivate your answer.
 
 ```{r}
@@ -73,8 +58,6 @@ summary(model_reduced)
 
 
 ## Question C)
-For the resulting model from b), can we also apply the Friedman test to test whether there is an effect of starter on acidity?
-
 ```{r}
 stats::friedman.test(
   acidity ~ starter | batch,
@@ -83,8 +66,6 @@ stats::friedman.test(
 
 
 ## Question D)
-Repeat c) by performing a mixed effects analysis, modeling the block variable(s) (if there are any) as a random effect by using the function lmer. (You will need to install the R-package lme4, which is not included in the standard distribution of R.) Compare your results to the results found by using the fixed effects model in c). Comment.
-
 ```{r}
 model_mixed <- lme4::lmer(
   acidity ~ starter + (1|batch), 
