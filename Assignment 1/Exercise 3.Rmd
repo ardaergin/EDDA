@@ -2,8 +2,11 @@
 title: "Exercise 3"
 author: "Arda Ergin"
 date: "2024-02-22"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
+# Exercise 3
 
 The file `cream.txt` contains data on an experiment to produce sour cream. 
 
@@ -24,7 +27,7 @@ The experiment was carried out with five batches of sweet cream, which were mean
 The combinations of levels of three factors form a three-dimensional latin square. (You may need to install the R-package lme4, which is not included in the standard distribution of R.)
 
 
-## Question 1
+### Question A)
 Analyze the data in a three-way experiment without interactions with acidity as response and starter, batch and position as factors. By using summary command, can you tell whether there is a significant difference between the effects of starter 1 and starter 2 on acidity? Motivate your answer.
 
 ```{r}
@@ -49,7 +52,7 @@ And the results of the analysis shows that, there is no significant difference b
 
 
 
-## Question 2
+## Question B)
 b)  Recall that the main interest is in the effect of starter on acidity; factors `position` and `batch` represent the block variables. Remove insignificant block variable(s) if there are such, and perform an ANOVA for the resulting “fixed effects” model. Which starter(s) lead to significantly different acidity? Motivate your answer.
 
 ```{r}
@@ -69,7 +72,7 @@ summary(model_reduced)
 ```
 
 
-## Question 3
+## Question C)
 For the resulting model from b), can we also apply the Friedman test to test whether there is an effect of starter on acidity?
 
 ```{r}
@@ -79,7 +82,7 @@ stats::friedman.test(
 ```
 
 
-## Question 4
+## Question D)
 Repeat c) by performing a mixed effects analysis, modeling the block variable(s) (if there are any) as a random effect by using the function lmer. (You will need to install the R-package lme4, which is not included in the standard distribution of R.) Compare your results to the results found by using the fixed effects model in c). Comment.
 
 ```{r}

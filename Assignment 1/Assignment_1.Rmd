@@ -1,0 +1,16 @@
+---  
+title: Assignment 1
+author: Arda Ergin, Onder Akacik, Adam Sulak
+output: 
+  pdf_document:
+    toc: no
+---
+
+```{r child = 'Exercise 1.Rmd'}
+```
+
+```{r child = 'Exercise 2.Rmd'}
+```
+
+```{r child = 'Exercise 3.Rmd'}
+```

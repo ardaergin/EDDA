@@ -6,6 +6,7 @@ output:
   pdf_document: default
   html_document: default
 ---
+# Exercise 2
 
 ## Question A)
 ```{r}
@@ -23,7 +24,10 @@ combinations <- expand.grid(rate = rates, method = methods)
 set.seed(123) # For reproducibility
 fish_ids <- 1:nrow(hemoglobin_data)
 assignments <- sample(fish_ids, length(fish_ids), replace = FALSE)
-combinations$fish_ids <- split(assignments, f = rep(1:nrow(combinations), each = length(assignments)/nrow(combinations)))
+combinations$fish_ids <- split(assignments,
+    f = rep(1:nrow(combinations),
+    each = length(assignments)/nrow(combinations))
+)
 
 # View the assignments
 print(combinations)
@@ -72,7 +76,11 @@ Combination: **rate:2** and **method:B** yielded the highest hemoglobin.
 **Rate 2** leads to the highest mean hemoglobin as it can be seen from the printed sorted means per combination. **Rate 3** is the second and **Rate 4** is the third and **Rate 1** is the fourth.
 
 ```{r}
-mean_hemoglobin_by_combination <- aggregate(hemoglobin ~ rate + method, data = hemoglobin_data, FUN = mean)
+mean_hemoglobin_by_combination <- aggregate(
+    hemoglobin ~ rate + method,
+    data = hemoglobin_data,
+    FUN = mean
+)
 
 sorted_means <- mean_hemoglobin_by_combination[order(-mean_hemoglobin_by_combination$hemoglobin), ]
 
@@ -95,7 +103,11 @@ hemoglobin_data$rate <- as.factor(hemoglobin_data$rate)
 anova_result_one_way <- anova(lm(hemoglobin ~ rate, data = hemoglobin_data))
 print(anova_result_one_way)
 
-mean_hemoglobin_by_rate <- aggregate(hemoglobin ~ rate, data = hemoglobin_data, FUN = mean)
+mean_hemoglobin_by_rate <- aggregate(
+    hemoglobin ~ rate,
+    data = hemoglobin_data,
+    FUN = mean
+)
 print(mean_hemoglobin_by_rate)
 
 ```

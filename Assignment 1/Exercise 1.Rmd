@@ -2,22 +2,28 @@
 title: "Exercise 1"
 author: "Adam Sulak, Onder Akacik"
 date: "2024-02-22"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
+# Exercise 1
+
 ## Question A)
+
 We first load `Ice_cream-1.csv`.
 ```{r}
 data <- read.table("./Ice_cream-1.csv", header = TRUE, sep = ",")
 ```
 
 We then proceed with confirming normality assumption. The qqplot and histogram show us that data is
-normaly distributed.
+normally distributed.
 ```{r}
 mu <- mean(data$video)
+par(mfrow=c(1,2))
 hist(data$video)
-qqnorm(data$video)
 plot(density(data$video))
+qqnorm(data$video)
 boxplot(data$video)
 ```
 
@@ -49,6 +55,7 @@ for (i in 1:b_count) {
     bootstrap_sample <- sample(data$video, replace=TRUE)
     bootstrap_stat[i] <- mean(bootstrap_sample)
 }
+par(mfrow=c(1,2))
 hist(bootstrap_stat)
 boxplot(bootstrap_stat)
 
@@ -60,14 +67,22 @@ bootstrap_conf_int
 ## Question B)
 We use one-sample T-test to check if mean score is larger than 50.
 ```{r}
-t_test_result <- t.test(data$video, mu = 50, alternative = "greater")
+t_test_result <- t.test(
+    data$video,
+    mu = 50,
+    alternative = "greater"
+)
 t_test_result
 ```
 Since we are interested in a score that is _greater_ than 50 we perform one-tailed test. in such test
 we reject Null hypothesis when tested mean (not sample mean!) is so low that is is outside of the confidence interval. In one-tailed test such confidence interval will span some real value for the lower bound and infinity in the upper bound. When value of the mean is lower that the lower bound of this Confidence Interval then we can say with high confidence that mean of population is lower than the tested mean. In this test we **reject Null hypothesis**
 
 ```{r}
-t_test51_result <- t.test(data$video, mu = 51, alternative = "greater")
+t_test51_result <- t.test(
+    data$video,
+    mu = 51,
+    alternative = "greater"
+)
 t_test51_result
 ```
 For the test with mean equal to 51 we have the same CI but result of the test is different.
@@ -82,14 +97,18 @@ First we run sign and Wilcoxon test to check if median score of video game is la
 # SIGN TEST
 test_median <- 50
 larger_median <- sum(data$video > test_median)
-sign_result <- binom.test(larger_median, n, conf.level = .97, alternative = 'greater')
+sign_result <- binom.test(
+    larger_median, n, 
+    conf.level = .97, 
+    alternative = 'greater'
+)
 
-wilcox_result <- wilcox.test(data$video, mu=50, alternative = 'greater')
+wilcox_result <- wilcox.test(data$video, mu=test_median, alternative = 'greater')
 sign_result; wilcox_result
 ```
 Next we perform sign test with modified parameters to check if 25 % of results are less than 42.
 ```{r}
-#wilcox_25_result <- wilcox.test(data$video, mu=42, alternative = 'less') # not sure if this one is correct
+#wilcox_25_result <- wilcox.test(data$video, mu=42, alternative = 'less')
 
 count_lt_42 <- sum(data$video < 42)
 
@@ -136,8 +155,13 @@ video_puzzle <- data[c('video', 'puzzle')]
 cor_result <- round(cor(video_puzzle), 3)
 pairs(video_puzzle)
 cor_test_result <- cor.test(video_puzzle$video, video_puzzle$puzzle)
-t_result <- t.test(video_puzzle$puzzle, video_puzzle$video, alternative = 'greater', paired = TRUE)
-#t_result <- t.test(video_puzzle$puzzle, video_puzzle$video)
+t_result <- t.test(
+    video_puzzle$puzzle,
+    video_puzzle$video,
+    alternative = 'greater',
+    paired = TRUE
+)
+
 cor_result; t_result
 ```
 The p-value resulting from the test is 0.232 therefore **alternative hypothesis is rejected**.
