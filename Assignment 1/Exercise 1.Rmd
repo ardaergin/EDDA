@@ -174,4 +174,4 @@ t_result <- t.test(
 cor_result; t_result
 ```
 
-The p-value resulting from the test is 0.232 therefore **alternative hypothesis is rejected**.
+Given the p-value of 0.232, which is greater than the suggested significance level of 0.05, we do **not have sufficient evidence to reject the null hypothesis**. Therefore, we **fail to support the alternative hypothesis.**
