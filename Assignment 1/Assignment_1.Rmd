@@ -1,10 +1,14 @@
----  
+---
 title: Assignment 1
 author: Arda Ergin, Onder Akacik, Adam Sulak
 output: 
   pdf_document:
     toc: no
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=8, fig.height=2)
+```
 
 ```{r child = 'Exercise 1.Rmd'}
 ```

@@ -91,7 +91,7 @@ combinations <- expand.grid(methods=methods, rates=rates)
 block <- xtabs(formula = hemoglobin~method+rate, data = hemo_data)
 
 attach(hemo_data)
-par(mfrow=c(1,2))
+par(mfrow=c(1,4))
 interaction.plot(method, rate, hemoglobin)
 interaction.plot(rate, method, hemoglobin)
 anova(lm(hemoglobin~method*rate))

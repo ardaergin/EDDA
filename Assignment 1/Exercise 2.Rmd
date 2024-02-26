@@ -42,7 +42,7 @@ rate is statistically significant. method and the interaction effect are not sta
 ```{r}
 
 attach(hemoglobin_data)
-par(mfrow=c(1,2))
+par(mfrow=c(1,4))
 interaction.plot(method, rate, hemoglobin)
 interaction.plot(rate, method, hemoglobin)
 boxplot(hemoglobin~rate)

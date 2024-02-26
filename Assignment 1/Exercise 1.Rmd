@@ -12,15 +12,16 @@ output:
 ## Question A)
 
 We first load `Ice_cream-1.csv`.
+
 ```{r}
 data <- read.table("./Ice_cream-1.csv", header = TRUE, sep = ",")
 ```
 
-We then proceed with confirming normality assumption. The qqplot and histogram show us that data is
-normally distributed.
+We then proceed with confirming normality assumption. The qqplot and histogram show us that data is normally distributed.
+
 ```{r}
 mu <- mean(data$video)
-par(mfrow=c(1,2))
+par(mfrow=c(1,4))
 hist(data$video)
 plot(density(data$video))
 qqnorm(data$video)
@@ -28,6 +29,7 @@ boxplot(data$video)
 ```
 
 Next we calculate .97 confidence interval for the video data.
+
 ```{r}
 n <- length(data$video)
 sd_sample <- sd(data$video)
@@ -39,14 +41,15 @@ upper_bound <- mu + margin_error
 lower_bound; upper_bound
 ```
 
-Then we proceed with calculating interval length<=3 (Answer: 205.17)
+Then we proceed with calculating interval length\<=3 (Answer: 205.17)
+
 ```{r}
 n_min = (z_score^2) * (sd_sample^2) / (1.5^2)
 n_min
 ```
 
-After than we calculate confidence interval using bootstraping. We take 10 000 boostrap samples to get a good
-approximation.
+After than we calculate confidence interval using bootstraping. We take 10 000 boostrap samples to get a good approximation.
+
 ```{r}
 # BOOTSTRAP 97% CONFIDENCE INTERVAL
 b_count <- 10000
@@ -55,7 +58,7 @@ for (i in 1:b_count) {
     bootstrap_sample <- sample(data$video, replace=TRUE)
     bootstrap_stat[i] <- mean(bootstrap_sample)
 }
-par(mfrow=c(1,2))
+par(mfrow=c(1,4))
 hist(bootstrap_stat)
 boxplot(bootstrap_stat)
 
@@ -64,8 +67,11 @@ s <- sum(bootstrap_stat<bootstrap_conf_int[1])
 bootstrap_conf_int_check <- c(2*mu-bootstrap_conf_int[2] ,2*mu-bootstrap_conf_int[1])
 bootstrap_conf_int
 ```
+
 ## Question B)
+
 We use one-sample T-test to check if mean score is larger than 50.
+
 ```{r}
 t_test_result <- t.test(
     data$video,
@@ -74,8 +80,8 @@ t_test_result <- t.test(
 )
 t_test_result
 ```
-Since we are interested in a score that is _greater_ than 50 we perform one-tailed test. in such test
-we reject Null hypothesis when tested mean (not sample mean!) is so low that is is outside of the confidence interval. In one-tailed test such confidence interval will span some real value for the lower bound and infinity in the upper bound. When value of the mean is lower that the lower bound of this Confidence Interval then we can say with high confidence that mean of population is lower than the tested mean. In this test we **reject Null hypothesis**
+
+Since we are interested in a score that is *greater* than 50 we perform one-tailed test. in such test we reject Null hypothesis when tested mean (not sample mean!) is so low that is is outside of the confidence interval. In one-tailed test such confidence interval will span some real value for the lower bound and infinity in the upper bound. When value of the mean is lower that the lower bound of this Confidence Interval then we can say with high confidence that mean of population is lower than the tested mean. In this test we **reject Null hypothesis**
 
 ```{r}
 t_test51_result <- t.test(
@@ -85,14 +91,13 @@ t_test51_result <- t.test(
 )
 t_test51_result
 ```
-For the test with mean equal to 51 we have the same CI but result of the test is different.
-Real mean of the sample is 51.85 which is higher than that tested mean of 51. However that tested mean is still
-within confidence interval so we cannot be sure with high certainty that actual population mean is higher. The p-value
-is equal to 0.113 which exceed 0.05 threshold.
 
+For the test with mean equal to 51 we have the same CI but result of the test is different. Real mean of the sample is 51.85 which is higher than that tested mean of 51. However that tested mean is still within confidence interval so we cannot be sure with high certainty that actual population mean is higher. The p-value is equal to 0.113 which exceed 0.05 threshold.
 
 ## Question C)
+
 First we run sign and Wilcoxon test to check if median score of video game is larger than 50.
+
 ```{r}
 # SIGN TEST
 test_median <- 50
@@ -106,7 +111,9 @@ sign_result <- binom.test(
 wilcox_result <- wilcox.test(data$video, mu=test_median, alternative = 'greater')
 sign_result; wilcox_result
 ```
+
 Next we perform sign test with modified parameters to check if 25 % of results are less than 42.
+
 ```{r}
 #wilcox_25_result <- wilcox.test(data$video, mu=42, alternative = 'less')
 
@@ -119,6 +126,7 @@ sign_25_result
 ```
 
 ## Question D)
+
 ```{r}
 b2_count <- 10000
 b2_stat <- numeric(b2_count)
@@ -130,8 +138,8 @@ for (i in 1:b2_count) {
 
 ## Question E)
 
-Since we know that sample comes from normal distribution two sample t test is a most suitable test to perform.
-We also perform Wilcoxon and Kolmogorov-Smirnov test and explain below the caveats.
+Since we know that sample comes from normal distribution two sample t test is a most suitable test to perform. We also perform Wilcoxon and Kolmogorov-Smirnov test and explain below the caveats.
+
 ```{r}
 vid_female <- data$video[data$female==1]
 vid_male <- data$video[data$female==0]
@@ -142,15 +150,16 @@ mf_ks_result <- ks.test(vid_male, vid_female, alternative = 'greater')
 
 mf_t_result; mf_wilcox_result; mf_ks_result
 ```
+
 Wlcoxon test compares medians of two samples not means, however it can still give us a good idea about the differences between samples.
 
-Kolmogorov-Smirnov test is used to check if two samples come from the same distribution or if one sample comes
-from normal distribution, here our goal is to check if mean of one sample is higher than a mean
-of a second sample which means KS test is incorrect test to perform.
+Kolmogorov-Smirnov test is used to check if two samples come from the same distribution or if one sample comes from normal distribution, here our goal is to check if mean of one sample is higher than a mean of a second sample which means KS test is incorrect test to perform.
 
 ## Question F)
+
 We run Pearson correlation test.
-```{r}
+
+```{r fig.height=5}
 video_puzzle <- data[c('video', 'puzzle')]
 cor_result <- round(cor(video_puzzle), 3)
 pairs(video_puzzle)
@@ -164,4 +173,5 @@ t_result <- t.test(
 
 cor_result; t_result
 ```
+
 The p-value resulting from the test is 0.232 therefore **alternative hypothesis is rejected**.
