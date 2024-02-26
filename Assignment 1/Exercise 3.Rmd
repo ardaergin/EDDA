@@ -59,16 +59,12 @@ lme4::lmer(acidity ~ starter + (1|batch), data = data)
 
 Here, in this model, we register `batch` as a "random effect". Here, through `(1|batch)`, we specify that we are allowing the intercept to vary across batches, by including a random intercept for each level of batch (as we indicate with `1`). This, in return, allows us to account for variability that is not of main interest (as, our main interest is the `starter`) but should be accounted for in the model.
 
-We can observe that $\sigma = 0.91$
-
-
-The results show that the standard deviation of the residuals is $0.90$, which show the variability within batches that is not explained by the model, and we can see that there is a certain variability that we are accounting through the random effects.
+The results show that the standard deviation of the residuals is $0.91$, which show the variability within batches that is not explained by the model, and we can see that there is a certain variability that we are accounting through the random effects.
 
 The Fixed Effects show the effects of different starters on acidity. Compared to Starter 1 Starters 2, 3, and 5 lead to an estimated decrease in the acidity by units of $-0.15$, $-0.98$, and $-0.48$ respectively. On the other hand, Starter 4, compared to Starter 1, leads to an estimated increase on acidity by unit of $2.81$.
 
 We can further test for significance with `lmerTest::lmer()`. If we conduct an ANOVA on the model, we see that the `starter` variable has a significant effect overall, $F(4,16) = 19.83$, $p < .001$ We also see that while the differences of Starter 2, 3, and 5 do not have a significant difference from Starter 1, Starter 4 seems to lead to a significantly higher acidity level, $t(16) = 5.96$, $p < .001$. 
 
 Interestingly, the F-value for the starter variable and the t-value for Starter 1 vs. Starter 4 comparison is the same as the fixed model, and in both models, the significance are the same.
-
 
 
