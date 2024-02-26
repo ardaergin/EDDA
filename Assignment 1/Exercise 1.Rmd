@@ -48,8 +48,8 @@ bootstrap_CI <- function(x, b_count){
       bootstrap_stat[i] <- mean(bootstrap_sample)
   }
   cat("97%-CI Bootstrap Confidence Interval: \n")
-  print(quantile(boot_results, c(0.015, 0.985)))
-  par(mfrow=c(1,2)); hist(boot_results); boxplot(boot_results)
+  print(quantile(bootstrap_stat, c(0.015, 0.985)))
+  par(mfrow=c(1,2)); hist(bootstrap_stat); boxplot(bootstrap_stat)
 }
 bootstrap_CI(data$video, 1000)
 ```

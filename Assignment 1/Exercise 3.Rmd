@@ -25,7 +25,7 @@ model <- stats::lm(acidity ~ batch + position + starter, data = data)
 The comparison category for the model is `starter = 1`. Hence, the `starter2` table essentially gives us whether there is a "*significant difference between the effects of starter 1 and starter 2 on acidity*". And the results of the analysis shows that, there is no significant difference between the two $t(12) = -0.321$, $p = 0.7534$, on their effect on acidity. This is also the case for starter 2, 3, and 5.
 
 
-## Question 1b)
+## Question 3b)
 ```{r}
 anova(model)
 ```
@@ -40,7 +40,7 @@ anova(model_reduced)
 In this reduced model, we see that the `batch` variable have a significant effect on acidity, $F(4,16) = 8.44$, $p < .001$, as well as the `starter` variable, $F(4,16) = 19.83$, $p < .001$. When we further investigate the model summary, we can see that `starter4` significantly differs from `starter1` on its effect on acidity, $t(16) = 5.96$, $p < .001$. The other starters do not have a significant differ from `starter1`.
 
 
-## Question C)
+## Question 3c)
 In our situation, **Friedman Rank Sum Test** could be a reasonable alternative. This is because batches can essentially be considered as "repeated-measures", which is the applicable situation for the Friedman Test. As a non-parametric test, it offers an alternative to repeated-measures ANOVA, and violations of the normality assumption do not bother it as it bothers ANOVA.
 
 ```{r}
@@ -50,7 +50,7 @@ stats::friedman.test(acidity ~ starter | batch, data = data)
 Similar to the ANOVA results, the results of the Friedman Rank Sum Test also shows that there is a statistically significant difference in acidity, $\chi^2(4) = 13.21$, $p = .01$.
 
 
-## Question D)
+## Question 3d)
 ```{r}
 lme4::lmer(acidity ~ starter + (1|batch), data = data)
 # summary(lmerTest::lmer(acidity ~ starter + (1|batch), data = data))
@@ -68,7 +68,7 @@ The Fixed Effects show the effects of different starters on acidity. Compared to
 
 We can further test for significance with `lmerTest::lmer()`. If we conduct an ANOVA on the model, we see that the `starter` variable has a significant effect overall, $F(4,16) = 19.83$, $p < .001$ We also see that while the differences of Starter 2, 3, and 5 do not have a significant difference from Starter 1, Starter 4 seems to lead to a significantly higher acidity level, $t(16) = 5.96$, $p < .001$. 
 
-Interestingly, the F-value for the starter variable and the t-value for Starter 1 vs. Starter 4 comparison is the same as the fixed model, and in both models, the significances are the same.
+Interestingly, the F-value for the starter variable and the t-value for Starter 1 vs. Starter 4 comparison is the same as the fixed model, and in both models, the significance are the same.
 
 
 
