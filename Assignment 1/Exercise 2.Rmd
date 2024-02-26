@@ -6,9 +6,11 @@ output:
   pdf_document: default
   html_document: default
 ---
+
 # Exercise 2
 
 ## Question A)
+
 ```{r}
 # Load data
 hemoglobin_data <- read.table("hemoglobin-1.txt", header = TRUE)
@@ -92,7 +94,7 @@ print(sorted_means)
 
 Performing this test is useful to understand the effect of the rate variable alone on hemoglobin levels, but it's important to remember that ignoring other variables (like the method in this case) might oversimplify the model and overlook potential interaction effects.
 
-The rate of sulfamerazine does have a significant effect on hemoglobin levels, so the **null hypothesis is rejected. (?)**
+The rate of sulfamerazine does have a significant effect on hemoglobin levels, so the **null hypothesis is rejected.**
 
 Estimated hemoglobin values for each rate are **Rate1 6.975, Rate2 9.735, Rate3 9.380, and Rate4 8.855**. Performing this test is useful to understand the effect of the rate variable alone on hemoglobin levels, but it's important to remember that ignoring other variables (like the method in this case) might oversimplify the model and overlook potential interaction effects.
 
@@ -113,11 +115,12 @@ print(mean_hemoglobin_by_rate)
 ```
 
 ## Question E)
-A non-parametric alternative to one-way ANOVA is Kruskal-Wallis test. We run the test with command
-below to to compare output with results from section D.
+
+A non-parametric alternative to one-way ANOVA is Kruskal-Wallis test. We run the test with command below to to compare output with results from section D.
+
 ```{r}
 kruskal_result <- kruskal.test(hemoglobin_data$hemoglobin, hemoglobin_data$rate)
 print(kruskal_result)
 ```
-The results of Kruskal-Wallis test are consistent with those from section D. We clearly see that hemoglobin levels are
-affected by the rate factor. The p-value is equal to 1.777e-07 which mean **Null hypothesis is rejected** again.
+
+The results of Kruskal-Wallis test are consistent with those from section D. We clearly see that hemoglobin levels are affected by the rate factor. The p-value is equal to 1.777e-07 which mean **Null hypothesis is rejected** again.
