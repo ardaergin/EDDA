@@ -7,10 +7,6 @@ output:
   html_document: default
 ---
 
-```{r}
-library(ggplot2)
-library(lme4)
-```
 
 # Exercise 1
 
@@ -109,40 +105,30 @@ We performed the Sign Test with modified parameters to check if the video game s
 
 ## Question 1d)
 ```{r}
-bootstrap_test <- function(n = 200, b_count = 100, mu, test = min(data$video)){
+set.seed(14)
+bootstrap_test <- function(
+    n = 200, b_count = 1000, mu, test = 26){
   bootstrap_stat <- numeric(n)
-  
   for (i in 1:b_count) {
       bootstrap_sample <- rnorm(n = n, mean = mu, sd = 10)
       bootstrap_stat[i] <- min(bootstrap_sample)
   }
   
-  pl = sum(boot_results < test)/1000
-  pr = sum(boot_results > test)/1000
+  pl = sum(bootstrap_stat < test) / b_count
+  pr = sum(bootstrap_stat > test) / b_count
   p_value = 2 * min(pl, pr)
-  
-  if(p_value > 0.05){
-    print(mean)
-  }
-  
-  # if (p_value > 0.05){main_results[i] = 0}
-  # else {main_results[i] = 1}
-  
+  return(p_value)
 }
-
-for(i in 1:100){
-  bootstrap_test(mu = i)
-}
-
-
+p = numeric(100); for(i in 1:100){p[i] = bootstrap_test(mu = i)}
+x = (1:100)[p > 0.05]; print(x)
 ```
 
+When we do the bootstrap test, we see that the interval we are looking for is `r min(x)` to `r max(x)`. For these hypotheses, $H_0$ is not rejected. We are not exactly sure what is meant by "this situation", but, if we are talking about the overall video game score data, one can argue that the video game score variable is not "continuous" enough to perform the Kolmogorov-Smirnov test, as the KS test depend on the data being continuous, not discrete.
 
 
 ## Question 1e)
 
 Since we know that sample comes from normal distribution two sample t test is a most suitable test to perform. We also perform Wilcoxon and Kolmogorov-Smirnov test and explain below the caveats.
-
 ```{r}
 vid_female <- data$video[data$female==1]
 vid_male <- data$video[data$female==0]
