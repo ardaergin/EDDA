@@ -7,13 +7,9 @@ output:
   html_document: default
 ---
 # Exercise 3
-
-The file `cream.txt` contains data on an experiment to produce sour cream. 
-
 ```{r}
 data <- read.table("cream.txt", header = TRUE)
 ```
-
 
 ## Question 3a)
 ```{r}
@@ -22,58 +18,57 @@ data$batch <- factor(data$batch)
 data$position <- factor(data$position)
 data$starter <- factor(data$starter)
 
-# Linear Modelling
-model <- stats::lm(
-  acidity ~ batch + position + starter, data = data)
-summary(model)
+model <- stats::lm(acidity ~ batch + position + starter, data = data)
+# summary(model)
 ```
 
-**Answer**: 
-The comparison category for the model is `starter = 1`. 
-
-Hence, the `starter2` table essentially gives us whether there is a "*significant difference between the effects of starter 1 and starter 2 on acidity*". 
-
-And the results of the analysis shows that, there is no significant difference between the two $t(12) = -0.321$, $p = 0.7534$.
-
+The comparison category for the model is `starter = 1`. Hence, the `starter2` table essentially gives us whether there is a "*significant difference between the effects of starter 1 and starter 2 on acidity*". And the results of the analysis shows that, there is no significant difference between the two $t(12) = -0.321$, $p = 0.7534$, on their effect on acidity. This is also the case for starter 2, 3, and 5.
 
 
 ## Question 1b)
-b)  Recall that the main interest is in the effect of starter on acidity; factors `position` and `batch` represent the block variables. Remove insignificant block variable(s) if there are such, and perform an ANOVA for the resulting “fixed effects” model. Which starter(s) lead to significantly different acidity? Motivate your answer.
-
 ```{r}
 anova(model)
 ```
 
-We see that, overall, `position` variable is insignificant. And the `summary()` above also gives us that there is no significant differences between any categories with `position1`. 
-
-Therefore, it can be removed from the model.
+The results of the ANOVA show that `position` variable does not have a significant effect on acidity, $F(4,12) = 1.08$, $p = 0.41$. And the `summary()` above also had given us that there is no significant differences between any categories with `position1`. Therefore, this variable can be removed from the model.
 ```{r}
-model_reduced <- stats::lm(
-  acidity ~ batch + starter, 
-  data = data)
-
+model_reduced <- stats::lm(acidity ~ batch + starter, data = data)
 anova(model_reduced)
-summary(model_reduced)
+# summary(model_reduced)
 ```
+
+In this reduced model, we see that the `batch` variable have a significant effect on acidity, $F(4,16) = 8.44$, $p < .001$, as well as the `starter` variable, $F(4,16) = 19.83$, $p < .001$. When we further investigate the model summary, we can see that `starter4` significantly differs from `starter1` on its effect on acidity, $t(16) = 5.96$, $p < .001$. The other starters do not have a significant differ from `starter1`.
 
 
 ## Question C)
+In our situation, **Friedman Rank Sum Test** could be a reasonable alternative. This is because batches can essentially be considered as "repeated-measures", which is the applicable situation for the Friedman Test. As a non-parametric test, it offers an alternative to repeated-measures ANOVA, and violations of the normality assumption do not bother it as it bothers ANOVA.
+
 ```{r}
-stats::friedman.test(
-  acidity ~ starter | batch,
-  data = data)
+stats::friedman.test(acidity ~ starter | batch, data = data)
 ```
+
+Similar to the ANOVA results, the results of the Friedman Rank Sum Test also shows that there is a statistically significant difference in acidity, $\chi^2(4) = 13.21$, $p = .01$.
 
 
 ## Question D)
 ```{r}
-model_mixed <- lme4::lmer(
-  acidity ~ starter + (1|batch), 
-  data = data)
-summary(model_mixed)
-anova(model_mixed)
+lme4::lmer(acidity ~ starter + (1|batch), data = data)
+# summary(lmerTest::lmer(acidity ~ starter + (1|batch), data = data))
+# anova(lmerTest::lmer(acidity ~ starter + (1|batch), data = data))
 ```
 
+Here, in this model, we register `batch` as a "random effect". Here, through `(1|batch)`, we specify that we are allowing the intercept to vary across batches, by including a random intercept for each level of batch (as we indicate with `1`). This, in return, allows us to account for variability that is not of main interest (as, our main interest is the `starter`) but should be accounted for in the model.
+
+We can observe that $\sigma = 0.91$
+
+
+The results show that the standard deviation of the residuals is $0.90$, which show the variability within batches that is not explained by the model, and we can see that there is a certain variability that we are accounting through the random effects.
+
+The Fixed Effects show the effects of different starters on acidity. Compared to Starter 1 Starters 2, 3, and 5 lead to an estimated decrease in the acidity by units of $-0.15$, $-0.98$, and $-0.48$ respectively. On the other hand, Starter 4, compared to Starter 1, leads to an estimated increase on acidity by unit of $2.81$.
+
+We can further test for significance with `lmerTest::lmer()`. If we conduct an ANOVA on the model, we see that the `starter` variable has a significant effect overall, $F(4,16) = 19.83$, $p < .001$ We also see that while the differences of Starter 2, 3, and 5 do not have a significant difference from Starter 1, Starter 4 seems to lead to a significantly higher acidity level, $t(16) = 5.96$, $p < .001$. 
+
+Interestingly, the F-value for the starter variable and the t-value for Starter 1 vs. Starter 4 comparison is the same as the fixed model, and in both models, the significances are the same.
 
 
 
