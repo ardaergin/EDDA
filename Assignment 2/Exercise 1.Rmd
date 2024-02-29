@@ -1,0 +1,107 @@
+---
+title: "Exercise 1"
+author: "Adam Sulak, Onder Akacik, Arda Ergin"
+date: "2024-02-22"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+options(digits=3)
+
+library(dplyr)
+library(ggplot2)
+```
+
+
+# Exercise 1
+```{r}
+data_raw <- read.table("fruitflies.txt", header = TRUE)
+```
+
+"Add a column loglongevity to the data-frame, containing the logarithm of the number of days until death."
+```{r}
+data_raw <- data_raw %>% mutate(Activity = factor(
+    dplyr::recode(activity, "isolated" = 0, "low" = 1, "high" = 2),
+    levels = 0:2, labels = c("Isolated","Low","High")))
+data_raw$loglongevity <- log(data_raw$longevity)
+data <- subset(data_raw, select = -c(activity,longevity))
+```
+
+
+## Question 1a)
+```{r}
+# Summary
+data_summary <- data %>% group_by(Activity) %>% summarise(
+    Mean = mean(loglongevity), SE = sd(loglongevity) / sqrt(n()))
+# Plotting
+data_summary %>% ggplot(aes(x = Activity, y = Mean, fill = Activity)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE),
+                width = 0.2, position = position_dodge(0.9)) +
+  labs(title = "Mean Log-Longevity of Fruit Flies by Sexual Activity Condition",
+       x = "Sexual Activity Condition", y = "Mean Log(Longevity)", 
+       fill = "Condition") +
+  coord_cartesian(ylim = c(3.25, 4.25)) + theme_classic()
+```
+
+Comments here.
+
+```{r}
+model <- lm(loglongevity ~ Activity, data = data)
+anova(model)
+summary(model)
+anova_result <- aov(LogLongevity ~ Group, data = df)
+summary(anova_result)
+
+```
+
+
+
+## Question 1b)
+```{r}
+model_with_cov = lm(loglongevity ~ Activity + thorax, data = data)
+anova(model_with_cov)
+summary(model_with_cov)
+drop1(model_with_cov, test="F") 
+
+anova(model, model_with_cov)
+```
+
+model with covaraite is better, more explanatory.
+
+Higher activity leads to a lower longevity, in both models
+
+```{r}
+
+```
+
+
+## Question 1c)
+```{r}
+data$thorax
+# Plotting
+data_summary %>% ggplot(aes(x = thorax, y = Mean, fill = thorax)) +
+  geom_line(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE),
+                width = 0.2, position = position_dodge(0.9)) +
+  labs(title = "Mean Log-Longevity of Fruit Flies by Sexual Activity Condition",
+       x = "Sexual Activity Condition", y = "Mean Log(Longevity)", 
+       fill = "Condition") +
+  coord_cartesian(ylim = c(3.25, 4.25)) + theme_classic()
+
+ggplot(data, aes(x = x, y = y)) +
+  geom_line() + # Draws the line
+  geom_point() + # Optionally adds points on top of the line
+  labs(title = "Line Graph of y vs. x",
+       x = "X Axis Label", # Replace with your x-axis label
+       y = "Y Axis Label") # Replace with your y-axis label
+```
+
+
+## Question 1d)
+
+
+## Question 1e)
+
