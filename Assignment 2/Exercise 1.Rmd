@@ -12,6 +12,7 @@ options(digits=3)
 
 library(dplyr)
 library(ggplot2)
+color_choice <- "Dark2"
 ```
 
 
@@ -26,7 +27,7 @@ data_raw <- data_raw %>% mutate(Activity = factor(
     dplyr::recode(activity, "isolated" = 0, "low" = 1, "high" = 2),
     levels = 0:2, labels = c("Isolated","Low","High")))
 data_raw$loglongevity <- log(data_raw$longevity)
-data <- subset(data_raw, select = -c(activity,longevity))
+data <- subset(data_raw, select = -c(activity))
 ```
 
 
@@ -34,27 +35,26 @@ data <- subset(data_raw, select = -c(activity,longevity))
 ```{r}
 # Summary
 data_summary <- data %>% group_by(Activity) %>% summarise(
-    Mean = mean(loglongevity), SE = sd(loglongevity) / sqrt(n()))
+    Mean_loglongevity = mean(loglongevity), SE_loglongevity = sd(loglongevity) / sqrt(n()),
+    Mean_thorax = mean(thorax), SE_thorax = sd(thorax) / sqrt(n()))
 # Plotting
-data_summary %>% ggplot(aes(x = Activity, y = Mean, fill = Activity)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE),
-                width = 0.2, position = position_dodge(0.9)) +
-  labs(title = "Mean Log-Longevity of Fruit Flies by Sexual Activity Condition",
-       x = "Sexual Activity Condition", y = "Mean Log(Longevity)", 
-       fill = "Condition") +
-  coord_cartesian(ylim = c(3.25, 4.25)) + theme_classic()
+data_summary %>% ggplot(aes(x = Activity, y = Mean_loglongevity, fill = Activity)) +
+  geom_bar(stat = "identity", position = "dodge",width = 0.7) +
+  geom_errorbar(aes(ymin = Mean_loglongevity - SE_loglongevity, 
+                    ymax = Mean_loglongevity + SE_loglongevity), width = 0.2) +
+  labs(x = "Sexual Activity Condition",y = "Mean Log(Longevity)",fill = "Condition",
+    title = "Mean Log-Longevity of Fruit Flies by Sexual Activity Condition") +
+  coord_cartesian(ylim = c(3.25, 4.25)) + theme_classic(base_family = "Times") +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15)) + 
+  scale_fill_brewer(palette = color_choice)
 ```
 
 Comments here.
 
 ```{r}
-model <- lm(loglongevity ~ Activity, data = data)
-anova(model)
-summary(model)
-anova_result <- aov(LogLongevity ~ Group, data = df)
-summary(anova_result)
-
+model_simple <- lm(loglongevity ~ Activity, data = data)
+anova(model_simple)
+summary(model_simple)
 ```
 
 
@@ -80,28 +80,78 @@ Higher activity leads to a lower longevity, in both models
 
 ## Question 1c)
 ```{r}
-data$thorax
-# Plotting
-data_summary %>% ggplot(aes(x = thorax, y = Mean, fill = thorax)) +
-  geom_line(stat = "identity", position = "dodge") +
-  geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE),
-                width = 0.2, position = position_dodge(0.9)) +
-  labs(title = "Mean Log-Longevity of Fruit Flies by Sexual Activity Condition",
-       x = "Sexual Activity Condition", y = "Mean Log(Longevity)", 
-       fill = "Condition") +
-  coord_cartesian(ylim = c(3.25, 4.25)) + theme_classic()
-
-ggplot(data, aes(x = x, y = y)) +
-  geom_line() + # Draws the line
-  geom_point() + # Optionally adds points on top of the line
-  labs(title = "Line Graph of y vs. x",
-       x = "X Axis Label", # Replace with your x-axis label
-       y = "Y Axis Label") # Replace with your y-axis label
+data %>% ggplot(aes(x = thorax, y = loglongevity, color = Activity)) + 
+  geom_point() + geom_smooth(method = "lm", se = TRUE) +
+  labs(x = "Thorax Length", y = "Log-Longevity", color = "Condition",
+    title = "Relationship between Thorax Length and Log-Longevity 
+    by Sexual Activity Condition") +
+  theme_classic(base_family = "Times") + 
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15)) + 
+  scale_color_brewer(palette = color_choice)
 ```
+
+
+
+
+
+```{r}
+model_with_interact = lm(loglongevity ~ Activity*thorax, data = data)
+summary(model_with_interact)
+```
+
+the interaction between the values gives us whether this positive effect of thorax length on (log-)longevity is different among the three sexual activity conditions, i.e., whether there is a difference in the slopes for the sexual activity conditions. The analysis results show that `activity*thorax` interaction is not significant.
+
+however, compared with isolated, HIGH sexual activity condition seems to be on the verge of significance, and we can also observe this in the plot. 
+
+
+
+both the plot and the analysis also tells us about the "assumption of homogeneity of regression slopes"
+
 
 
 ## Question 1d)
 
+There is no 'wrong analysis' per se. However, considering the fact that thorax length was a significant factor, it is better to include it in the model. Considering the model comparison, the model with the covariate is significantly more explanatory than the model without the covariate. Hence, thorax length significantly explains some part of the variance in the data, we should be including it in the model. Although we should not include the interaction term. 
+```{r}
+anova(model_simple, model_with_cov)
+```
+
+
+
+
+I am not sure about this answer! - I mean, i am not sure if this is what they are asking
+
+
+
 
 ## Question 1e)
+e)  Perform the ANCOVA with the number of days as the response, rather than its logarithm. Was it wise to use the logarithm as response?
+
+
+```{r}
+model_with_cov_nolog = lm(longevity ~ Activity + thorax, data = data)
+anova(model_with_cov_nolog); summary(model_with_cov_nolog)
+```
+
+
+
+```{r}
+par(mfrow = c(1,2))
+hist(data$longevity);hist(data$loglongevity)
+```
+
+in terms of heteroskedasticty - log seems to be better in terms of the "variances of the error terms being equal"
+
+
+```{r}
+par(mfrow = c(1,2))
+plot(model_with_cov, which = 1)
+plot(model_with_cov_nolog, which = 1)
+```
+
+
+Log-transformation makes sense when:
+1. we have Skewed Data
+2. range of values are problematic in terms of creating outliers, that 
+
 
