@@ -111,7 +111,7 @@ both the plot and the analysis also tells us about the "assumption of homogeneit
 
 ## Question 1d)
 
-There is no 'wrong analysis' per se. However, considering the fact that thorax length was a significant factor, it is better to include it in the model. Considering the model comparison, the model with the covariate is significantly more explanatory than the model without the covariate. Hence, thorax length significantly explains some part of the variance in the data, we should be including it in the model. Although we should not include the interaction term. 
+There is no 'wrong analysis' per se in the beginning. However, considering the fact that thorax length was a significant factor, it is better to include it in the model. Considering the model comparison, the model with the covariate is significantly more explanatory than the model without the covariate. Hence, thorax length significantly explains some part of the variance in the data, we should be including it in the model. Although we should not include the interaction term. 
 ```{r}
 anova(model_simple, model_with_cov)
 ```
@@ -153,5 +153,6 @@ plot(model_with_cov_nolog, which = 1)
 Log-transformation makes sense when:
 1. we have Skewed Data
 2. range of values are problematic in terms of creating outliers, that 
+- 
 
 

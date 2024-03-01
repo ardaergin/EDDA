@@ -1,0 +1,98 @@
+---
+title: "Exercise 1"
+author: "Adam Sulak, Onder Akacik, Arda Ergin"
+date: "2024-02-22"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+options(digits=3)
+
+library(dplyr)
+library(ggplot2)
+library(car)
+color_choice <- "Dark2"
+```
+
+
+# Exercise 2
+
+```{r}
+data <- read.csv("Birthweight.csv")
+```
+
+
+## Question 2a)
+```{r}
+model_0 <- lm(Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mheight + mppwt + fage + fedyrs + fnocig + fheight, data = data)
+summary(model)
+```
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(model)
+
+
+resid_ordered <- order(abs(residuals(model)))
+u = rep(0,length(resid_ordered))
+u[length(resid_ordered)] = 1
+
+cooks.distance(model)
+plot(cooks.distance(model), type="b")
+
+forbeslm_42 = lm(y~x+u11); summary(forbeslm11)
+```
+
+
+Collinearity:
+```{r}
+car::vif(model)
+```
+
+no variables have a VIF value that is higher than 5
+
+```{r}
+library(corrplot)
+
+# Calculate correlation matrix
+cor_matrix <- cor(data[, -c(1,3)]) # Exclude response variable Birthweight
+
+# Plot the correlation matrix
+corrplot(cor_matrix, method = "circle", type = "upper", tl.col = "black", tl.cex = 0.6)
+
+```
+
+
+
+## Question 2b)
+
+```{r}
+
+```
+
+
+
+## Question 2c)
+
+
+## Question 2d)
+
+
+## Question 2e)
+
+
+## Question 2f)
+
+
+## Question 2g)
+
+
+## Question 2h)
+
+
+## Question 2i)
+
+
