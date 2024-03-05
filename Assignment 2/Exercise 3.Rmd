@@ -1,0 +1,22 @@
+---
+title: "Exercise 3"
+author: "Adam Sulak, Onder Akacik, Arda Ergin"
+date: "2024-02-22"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Exercise 3
+
+```{r}
+data <- read.table('awards.txt', header=TRUE)
+```
+
+
+## Question 3a)
+
+## Question 3b)
+
+## Question 3c)
+
