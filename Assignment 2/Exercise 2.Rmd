@@ -13,6 +13,7 @@ options(digits=3)
 library(dplyr)
 library(ggplot2)
 library(car)
+library(corrplot)
 color_choice <- "Dark2"
 ```
 
@@ -26,7 +27,7 @@ data <- read.csv("Birthweight.csv")
 
 ## Question 2a)
 ```{r}
-model_0 <- lm(Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mheight + mppwt + fage + fedyrs + fnocig + fheight, data = data)
+model <- lm(Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mheight + mppwt + fage + fedyrs + fnocig + fheight, data = data)
 summary(model)
 ```
 
@@ -55,14 +56,11 @@ car::vif(model)
 no variables have a VIF value that is higher than 5
 
 ```{r}
-library(corrplot)
-
 # Calculate correlation matrix
 cor_matrix <- cor(data[, -c(1,3)]) # Exclude response variable Birthweight
 
 # Plot the correlation matrix
 corrplot(cor_matrix, method = "circle", type = "upper", tl.col = "black", tl.cex = 0.6)
-
 ```
 
 
@@ -77,6 +75,8 @@ corrplot(cor_matrix, method = "circle", type = "upper", tl.col = "black", tl.cex
 
 ## Question 2c)
 
+```{r}
+```
 
 ## Question 2d)
 
