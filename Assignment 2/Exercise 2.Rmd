@@ -14,6 +14,7 @@ library(dplyr)
 library(ggplot2)
 library(car)
 library(corrplot)
+library(glmnet)
 color_choice <- "Dark2"
 ```
 
@@ -28,6 +29,7 @@ data <- read.csv("Birthweight.csv")
 ## Question 2a)
 ```{r}
 model <- lm(Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mheight + mppwt + fage + fedyrs + fnocig + fheight, data = data)
+#model <- lm(Birthweight ~ ., data = data)
 summary(model)
 ```
 
@@ -68,7 +70,11 @@ corrplot(cor_matrix, method = "circle", type = "upper", tl.col = "black", tl.cex
 ## Question 2b)
 
 ```{r}
-
+all_model <- lm(Birthweight ~ ., data=data)
+step_down_model <- step(all_model, direction = 'backward')
+summary(step_down_model)
+par(mfrow = c(1,2))
+plot(step_down_model)
 ```
 
 
@@ -76,14 +82,24 @@ corrplot(cor_matrix, method = "circle", type = "upper", tl.col = "black", tl.cex
 ## Question 2c)
 
 ```{r}
+ci <- confint.lm(step_down_model)
+pi <- predict(step_down_model, interval = 'prediction')
+ci; pi
 ```
 
 ## Question 2d)
 
+LASSO method
+```{r}
+lasso_model <- glmnet(all_model)
+plot(lasso_model, xvar="lambda")
+```
+
 
 ## Question 2e)
-
-
+```{r}
+smoke_model <- lm( lowbwt ~ Gestation+smoker+mage35, data=data)
+```
 ## Question 2f)
 
 
