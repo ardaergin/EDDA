@@ -91,7 +91,7 @@ ci; pi
 
 LASSO method
 ```{r}
-lasso_model <- glmnet(all_model)
+lasso_model <- glmnet(subset(data, select = -c(data$Birthweight)), data$Birthweight, alpha = 1)
 plot(lasso_model, xvar="lambda")
 ```
 
