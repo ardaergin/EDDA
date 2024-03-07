@@ -89,18 +89,32 @@ ci; pi
 LASSO method
 
 ```{r}
-lasso_model <- glmnet(
-    subset(data, select = -c(Birthweight, ID)),
-    data$Birthweight,
-    alpha = 1
-)
+x <- subset(data, select = -Birthweight)
+y <- data$Birthweight
+
+train=sample(1:nrow(x),0.67*nrow(x))
+x_train=x[train,]; y_train=y[train]
+x_test=x[-train,]; y_test = y[-train]
+
+y_predict_lm=predict(model,newdata=data[-train,]) # predict for the test rows
+mse_lm=mean((y_test-y_predict_lm)^2); mse_lm # prediction quality by the linear model
+
+lasso_model <- glmnet(x_train, y_train, alpha = 1)
+
+
 lasso_cv_model <- cv.glmnet(
-    as.matrix(subset(data, select = -c(Birthweight, ID))),
-    data$Birthweight,
+    as.matrix(x_train),
+    y_train,
     alpha = 1,
     type.measure="mse",
     nfolds=5
 )
+
+lasso_pred1=predict(lasso_model,s=lasso_cv_model$lambda.min,newx=as.matrix(x_test))
+lasso_pred2=predict(lasso_model,s=lasso_cv_model$lambda.1se,newx=as.matrix(x_test))
+mse1_lasso=mean((y_test-lasso_pred1)^2); mse1_lasso
+mse2_lasso=mean((y_test-lasso_pred2)^2); mse2_lasso
+
 
 plot(lasso_model, xvar="lambda", label = TRUE)
 plot(lasso_model, xvar="dev", label = TRUE)
