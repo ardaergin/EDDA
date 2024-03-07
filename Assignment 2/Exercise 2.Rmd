@@ -18,15 +18,14 @@ library(glmnet)
 color_choice <- "Dark2"
 ```
 
-
 # Exercise 2
 
 ```{r}
 data <- read.csv("Birthweight.csv")
 ```
 
-
 ## Question 2a)
+
 ```{r}
 model <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mheight + mppwt + fage + fedyrs + fnocig + fheight,
@@ -35,7 +34,6 @@ model <- lm(
 #model <- lm(Birthweight ~ ., data = data)
 summary(model)
 ```
-
 
 ```{r}
 par(mfrow=c(2,2))
@@ -52,8 +50,8 @@ plot(cooks.distance(model), type="b")
 forbeslm_42 = lm(y~x+u11); summary(forbeslm11)
 ```
 
-
 Collinearity:
+
 ```{r}
 car::vif(model)
 ```
@@ -69,8 +67,6 @@ corrplot(cor_matrix,
          method = "circle", type = "upper", tl.col = "black", tl.cex = 0.6)
 ```
 
-
-
 ## Question 2b)
 
 ```{r}
@@ -79,8 +75,6 @@ summary(step_down_model)
 par(mfrow = c(1,2))
 plot(step_down_model)
 ```
-
-
 
 ## Question 2c)
 
@@ -93,17 +87,30 @@ ci; pi
 ## Question 2d)
 
 LASSO method
+
 ```{r}
 lasso_model <- glmnet(
-    subset(data, select = -c(data$Birthweight)),
+    subset(data, select = -c(Birthweight, ID)),
     data$Birthweight,
     alpha = 1
 )
+lasso_cv_model <- cv.glmnet(
+    as.matrix(subset(data, select = -c(Birthweight, ID))),
+    data$Birthweight,
+    alpha = 1,
+    type.measure="mse",
+    nfolds=5
+)
+
 plot(lasso_model, xvar="lambda", label = TRUE)
+plot(lasso_model, xvar="dev", label = TRUE)
+plot(lasso_cv_model)
+coef(lasso_cv_model, s= lasso_cv_model$lambda.1se)
+
 ```
 
-
 ## Question 2e)
+
 ```{r}
 smoke_model_all <- lm( lowbwt ~ Gestation+smoker+mage35, data=data)
 summary(smoke_model_all)
@@ -114,16 +121,11 @@ m3 <- lm(lowbwt ~ smoker+mage35, data=data)
 summary(m1); summary(m2); summary(m3)
 smoke_step_down <- step(smoke_model_all, direction = 'backward')
 ```
-Using drop down methods we conclude age has no significance. We select Gestation and smoker parameters.
-## Question 2f)
 
+Using drop down methods we conclude age has no significance. We select Gestation and smoker parameters. \## Question 2f)
 
 ## Question 2g)
 
-
 ## Question 2h)
 
-
 ## Question 2i)
-
-
