@@ -76,8 +76,73 @@ corrplot(cor_matrix,
 b)  Use the step-down method to possibly reduce the number of explanatory variables. Comment on your findings. (Check the model assumptions only for the resulting model.)
 
 ```{r}
-step_down_model <- step(model, direction = 'backward')
+#step_down_model <- step(model, direction = 'backward')
+model <- lm(
+    Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mheight + mppwt + fage + fedyrs + fnocig + fheight,
+    data = data
+)
+summary(model)
+# remove fage
+model_1 <- lm(
+    Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mheight + mppwt + fedyrs + fnocig + fheight,
+    data = data
+)
+summary(model_1)
+#remove mheight
+model_2 <- lm(
+    Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mppwt + fedyrs + fnocig + fheight,
+    data = data
+)
+summary(model_2)
+#remove fedyrs
+model_3 <- lm(
+    Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mppwt + fnocig + fheight,
+    data = data
+)
+summary(model_3)
+#remove fnocig
+model_4 <- lm(
+    Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mppwt + fheight,
+    data = data
+)
+summary(model_4)
+
+#remove mnocig
+model_5 <- lm(
+    Birthweight ~ Length + Headcirc + Gestation + mage + mppwt + fheight,
+    data = data
+)
+summary(model_5)
+
+#remove length
+model_6 <- lm(
+    Birthweight ~ Headcirc + Gestation + mage + mppwt + fheight,
+    data = data
+)
+summary(model_6)
+#remove fheight
+model_7 <- lm(
+    Birthweight ~ Headcirc + Gestation + mage + mppwt,
+    data = data
+)
+summary(model_7)
+#remove mage
+model_8 <- lm(
+    Birthweight ~ Headcirc + Gestation + mppwt,
+    data = data
+)
+summary(model_8)
+
+#remove mppwt
+step_down_model <- lm(
+    Birthweight ~ Headcirc + Gestation,
+    data = data
+)
 summary(step_down_model)
+
+
+
+
 par(mfrow = c(1,2))
 plot(step_down_model)
 ```
@@ -87,8 +152,6 @@ plot(step_down_model)
 c)  Determine 95% confidence and prediction intervals for *Birthweight* using the resulting model from b) for the average values of all the predictors in that model.
 
 ```{r}
-step_down_model <- lm(Birthweight ~ Gestation + Headcirc, data = data)
-
 head_mean <- mean(data$Gestation)
 gest_mean <- mean(data$Headcirc)
 
@@ -193,8 +256,12 @@ summary(log_model2)
 ```
 
 ## Question 2g)
-
-g) Investigate the interaction of predictor *Gestation* with *smoker*, and the interaction of *Gestation* with *mage35* (one interaction at a time). From this and f), choose a resulting model.
+Investigate the interaction of predictor *Gestation* with *smoker*, and the interaction of *Gestation* with *mage35* (one interaction at a time). From this and f), choose a resulting model.
+```{r}
+gest_smoker <- lm(Gestation ~ smoker, data=data)
+gest_mage35 <- lm(Gestation ~ mage35, data=data)
+summary(gest_smoker); summary(gest_mage35)
+```
 
 ## Question 2h)
 
