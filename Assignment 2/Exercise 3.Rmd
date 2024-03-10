@@ -15,27 +15,41 @@ data <- read.table('awards.txt', header=TRUE)
 
 ## Question 3a)
 
-a)  Investigate whether the type of program influences the number of awards by performing a Poisson regression, without taking variable *math* into account. Estimate the numbers of awards for all the three types of program. Which program type is the best for the number of awards for this model?
+a)   Investigate whether the type of program influences the number of awards by performing a Poisson regression, without taking variable *math* into account. Estimate the numbers of awards for all the three types of program. Which program type is the best for the number of awards for this model?
 
 ```{r}
 
 data$prog = as.factor(data$prog);
 mod1 = glm(num_awards ~ prog, family="poisson", data=data);
 summary(mod1); 
-exp(coef(mod1));
+
+# Exponentiate the coefficients to get the relative multipliers
+exp_coefs <- exp(coef(mod1))
+
+# The intercept gives the expected count for prog1
+expected_prog1 = exp(coef(mod1)["(Intercept)"])
+
+# For prog2 and prog3, multiply the expected count for prog1 by their relative multipliers
+expected_prog2 = expected_prog1 * exp_coefs["prog2"]
+expected_prog3 = expected_prog1 * exp_coefs["prog3"]
+
+# Output the expected counts
+expected_prog1
+expected_prog2
+expected_prog3
 ```
 
 Answer:
 
 -   The type of program **significantly influences** the number of awards students receive. This is evidenced by the Poisson regression model, where the coefficient for the general program (prog2) is statistically significant, indicating a higher expected number of awards compared to the vocational program (prog1/reference). However, the difference between the academic program (prog3) and the vocational program (prog1/reference) is not statistically significant at the 0.05 level.
 
--   **(!!! MIGHT BE WRONG)** The expected number of awards for vocational (prog1), general (prog2), and academic (prog3) programs are approximately **0.578, 2.027, and 1.558** awards respectively. This estimation is based on the exponentiated coefficients from the Poisson regression model.
+-   The expected number of awards for vocational (prog1), general (prog2), and academic (prog3) programs are approximately **0.578, 1.17, and 0.9** awards respectively. This estimation is based on the exponentiated coefficients from the Poisson regression model.
 
 -   The general program **(prog2) is the best** for maximizing the number of awards, as students in this program are expected to receive the highest number of awards compared to the other programs, based on the model's estimates.
 
 ## Question 3b)
 
-b)  For the situation in a), can the Kruskall-Wallis test also be used? If yes, apply the test and comment on the results; of no, explain why this test cannot be used.
+b)   For the situation in a), can the Kruskall-Wallis test also be used? If yes, apply the test and comment on the results; of no, explain why this test cannot be used.
 
 ```{r}
 
@@ -50,23 +64,27 @@ Answer:
 
 ## Question 3c)
 
-c)  Now include predictor *math* into analysis and investigate the influence of the explanatory variables *prog* and *math* (and their interaction) on the numbers of awards. Which program type is the best for the number of awards? Comments on your findings. Use the resulting model to predict the numbers of awards for all three programs and math score 56.
+c)   Now include predictor *math* into analysis and investigate the influence of the explanatory variables *prog* and *math* (and their interaction) on the numbers of awards. Which program type is the best for the number of awards? Comments on your findings. Use the resulting model to predict the numbers of awards for all three programs and math score 56.
 
 ```{r}
 
 mod2 = glm(num_awards ~ prog * math , family="poisson", data=data);
 summary(mod2); 
 
+mod3 = glm(num_awards ~ prog + math , family="poisson", data=data);
+summary(mod3); 
+```
+
+-   After including the predictor *math* and investigating the influence of *prog*, *math*, and their interaction on the number of awards, the coefficients in model 2 (mod2) were not statistically significant. This led to the creation of a simplified model 3 (mod3) without the interaction terms. The results from mod3 indicate that both program type and math scores significantly influence the number of awards, with math scores showing a strong positive effect. This suggests that higher math scores are associated with a higher number of awards, independent of program type.
+-   Based on the comparison of coefficients from the model, **program type 3** is identified as the best for maximizing the number of awards. With a coefficient of **0.56172**, it surpasses program type 2, which has a coefficient of **0.45262**. This indicates that, holding math scores constant, students in program type 3 are expected to receive the highest number of awards due to its more substantial positive impact on the award count.
+-   Below, the resulting model is used to predict the numbers of awards for all three programs and math score being 56.
+
+```{r}
 # Create a new data frame for prediction
 new_data <- expand.grid(prog = factor(levels(data$prog)), math = 56)
 
 # Predict the number of awards using the model
-new_data$predicted_awards <- predict(mod2, newdata = new_data, type = "response")
+new_data$predicted_awards <- predict(mod3, newdata = new_data, type = "response")
 
 print(new_data)
-
 ```
-
-Answer:
-
--   **(!!! MIGHT BE WRONG)** Based on the provided model summary and the lack of statistically significant effects, there is no clear evidence to suggest that one program type is definitively the best for maximizing the number of awards. The analysis does not reveal a statistically significant difference in the number of awards between the program types when accounting for math scores and their interaction with program types.
