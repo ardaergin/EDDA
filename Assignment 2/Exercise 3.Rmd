@@ -13,10 +13,60 @@ output:
 data <- read.table('awards.txt', header=TRUE)
 ```
 
-
 ## Question 3a)
+
+a)  Investigate whether the type of program influences the number of awards by performing a Poisson regression, without taking variable *math* into account. Estimate the numbers of awards for all the three types of program. Which program type is the best for the number of awards for this model?
+
+```{r}
+
+data$prog = as.factor(data$prog);
+mod1 = glm(num_awards ~ prog, family="poisson", data=data);
+summary(mod1); 
+exp(coef(mod1));
+```
+
+Answer:
+
+-   The type of program **significantly influences** the number of awards students receive. This is evidenced by the Poisson regression model, where the coefficient for the general program (prog2) is statistically significant, indicating a higher expected number of awards compared to the vocational program (prog1/reference). However, the difference between the academic program (prog3) and the vocational program (prog1/reference) is not statistically significant at the 0.05 level.
+
+-   **(!!! MIGHT BE WRONG)** The expected number of awards for vocational (prog1), general (prog2), and academic (prog3) programs are approximately **0.578, 2.027, and 1.558** awards respectively. This estimation is based on the exponentiated coefficients from the Poisson regression model.
+
+-   The general program **(prog2) is the best** for maximizing the number of awards, as students in this program are expected to receive the highest number of awards compared to the other programs, based on the model's estimates.
 
 ## Question 3b)
 
+b)  For the situation in a), can the Kruskall-Wallis test also be used? If yes, apply the test and comment on the results; of no, explain why this test cannot be used.
+
+```{r}
+
+kruskal.test(num_awards ~ prog, data = data)
+```
+
+Answer:
+
+-   Yes, the Kruskal-Wallis test can be used as a non-parametric alternative to investigate whether the type of program influences the number of awards students receive. This test is suitable for comparing the distributions of a continuous or ordinal dependent variable (in this case, the number of awards) across more than two groups (the program types) without assuming a normal distribution of the data.
+
+-   The p-value obtained from the Kruskal-Wallis test is 0.00462, which is less than the significance level of 0.05. This indicates that there are statistically significant differences in the distribution of the number of awards received by students across the three types of programs (vocational, general, and academic).
+
 ## Question 3c)
 
+c)  Now include predictor *math* into analysis and investigate the influence of the explanatory variables *prog* and *math* (and their interaction) on the numbers of awards. Which program type is the best for the number of awards? Comments on your findings. Use the resulting model to predict the numbers of awards for all three programs and math score 56.
+
+```{r}
+
+mod2 = glm(num_awards ~ prog * math , family="poisson", data=data);
+summary(mod2); 
+
+# Create a new data frame for prediction
+new_data <- expand.grid(prog = factor(levels(data$prog)), math = 56)
+
+# Predict the number of awards using the model
+new_data$predicted_awards <- predict(mod2, newdata = new_data, type = "response")
+
+print(new_data)
+
+```
+
+Answer:
+
+-   **(!!! MIGHT BE WRONG)** Based on the provided model summary and the lack of statistically significant effects, there is no clear evidence to suggest that one program type is definitively the best for maximizing the number of awards. The analysis does not reveal a statistically significant difference in the number of awards between the program types when accounting for math scores and their interaction with program types.
