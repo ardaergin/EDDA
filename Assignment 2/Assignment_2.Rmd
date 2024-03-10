@@ -1,5 +1,5 @@
 ---
-title: "Assignment 1"
+title: "Assignment 2"
 author: "Adam Sulak, Onder Akacik, Arda Ergin"
 output: 
   pdf_document:
