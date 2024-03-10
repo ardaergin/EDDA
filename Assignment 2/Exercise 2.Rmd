@@ -163,22 +163,43 @@ e) Do smoking mothers seem to have lighter babies? Do older mothers seem to have
 # smoke_step_down <- step(smoke_model_all, direction = 'backward')
 # summary(smoke_step_down)
 # plot(smoke_step_down)
+table <- xtabs(lowbwt ~ smoker + mage35, data=data)
+table
+summary(table)
+# chisq.test(table)
+
+data$smoker <- as.factor(data$smoker)
+data$mage35 <- as.factor(data$mage35)
+
+boxplot(Birthweight ~ smoker, data=data)
+boxplot(Birthweight ~ mage35, data=data)
 ```
 
 Using drop down methods we conclude age has no significance. We select Gestation and smoker parameters.
 
 ## Question 2f)
 
-f)  To investigate the effect of the predictors on the baby weight, apply a logistic regression model (no interactions). Interpret the results in terms of odds, comment, compare to e).
+To investigate the effect of the predictors on the baby weight, apply a logistic regression model (no interactions). Interpret the results in terms of odds, comment, compare to e).
+
+```{r}
+smokert <- xtabs(~smoker, data=data)
+barplot(xtabs(lowbwt~smoker,data=data)/smokert)
+
+log_model <- glm(lowbwt ~ smoker + mage35, data=data, family='binomial')
+summary(log_model)
+
+log_model2 <- glm(lowbwt ~ smoker, data=data, family='binomial')
+summary(log_model2)
+```
 
 ## Question 2g)
 
-g)  Investigate the interaction of predictor *Gestation* with *smoker*, and the interaction of *Gestation* with *mage35* (one interaction at a time). From this and f), choose a resulting model.
+g) Investigate the interaction of predictor *Gestation* with *smoker*, and the interaction of *Gestation* with *mage35* (one interaction at a time). From this and f), choose a resulting model.
 
 ## Question 2h)
 
-h)  For the resulting model from g), estimate the probability of low baby weight for each combination of levels of the involved factors and the gestation of 40 weeks.
+h) For the resulting model from g), estimate the probability of low baby weight for each combination of levels of the involved factors and the gestation of 40 weeks.
 
 ## Question 2i)
 
-i)  Another approach to address the questions in e) would be to apply a contingency table test. Implement the relevant test(s). Is this approach wrong? Name both an advantage and a disadvantage of this approach as compared to the one from f).
+i) Another approach to address the questions in e) would be to apply a contingency table test. Implement the relevant test(s). Is this approach wrong? Name both an advantage and a disadvantage of this approach as compared to the one from f).
