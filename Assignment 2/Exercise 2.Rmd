@@ -20,11 +20,15 @@ color_choice <- "Dark2"
 
 # Exercise 2
 
+In this part, let the column *Birthweight* be the response variable and let the variables *Length, Headcirk, Gestation, mage, mnosig, mheight, mppwt, fage, fedyrs, fnosig, fheight* be the potential predictors.
+
 ```{r}
 data <- read.csv("Birthweight.csv")
 ```
 
 ## Question 2a)
+
+a)  Investigate the problem of potential and influence points, and the problem of collinearity.
 
 ```{r}
 model <- lm(
@@ -69,6 +73,8 @@ corrplot(cor_matrix,
 
 ## Question 2b)
 
+b)  Use the step-down method to possibly reduce the number of explanatory variables. Comment on your findings. (Check the model assumptions only for the resulting model.)
+
 ```{r}
 step_down_model <- step(model, direction = 'backward')
 summary(step_down_model)
@@ -77,6 +83,8 @@ plot(step_down_model)
 ```
 
 ## Question 2c)
+
+c)  Determine 95% confidence and prediction intervals for *Birthweight* using the resulting model from b) for the average values of all the predictors in that model.
 
 ```{r}
 step_down_model <- lm(Birthweight ~ Gestation + Headcirc, data = data)
@@ -95,7 +103,7 @@ ci; pi
 
 ## Question 2d)
 
-LASSO method
+d)  Now apply the LASSO method along the lines outlined in the lecture to select the relevant variables (features) for predicting the response *Birthweight* (with default parameters as in the lecture and *lambda=lambda.1se*). Compare the prediction by the selected LASSO model with that by the model form b). Comment. (You will need to install the R-package *glmnet*, which is not included in the standard distribution of R. Also beware that in general a new run may deliver a new model.)
 
 ```{r}
 x <- subset(data, select = -Birthweight)
@@ -136,25 +144,41 @@ mse_lm; mse1_lasso; mse2_lasso
 
 ## Question 2e)
 
+In this part, consider the binary column *lowbwt* as the main variable of interest to investigate the effect of the predictors *Gestation, smoker* and *mage35* (disregard all the other columns) on the baby weight.
+
+e) Do smoking mothers seem to have lighter babies? Do older mothers seem to have lighter babies? To possibly support your answer(s), study the data and give a few (\>1) summaries (graphics or tables).
+
 ```{r}
-smoke_model_all <- lm( lowbwt ~ Gestation+smoker+mage35, data=data)
-# summary(smoke_model_all)
 
-# manual step down
-m1 <- lm(lowbwt ~ Gestation+smoker, data=data)
-m2 <- lm(lowbwt ~ Gestation, data=data)
-# summary(m1); summary(m2)
 
-# automatic step down
-smoke_step_down <- step(smoke_model_all, direction = 'backward')
-summary(smoke_step_down)
-plot(smoke_step_down)
+# smoke_model_all <- lm( lowbwt ~ Gestation+smoker+mage35, data=data)
+# # summary(smoke_model_all)
+# 
+# # manual step down
+# m1 <- lm(lowbwt ~ Gestation+smoker, data=data)
+# m2 <- lm(lowbwt ~ Gestation, data=data)
+# # summary(m1); summary(m2)
+# 
+# # automatic step down
+# smoke_step_down <- step(smoke_model_all, direction = 'backward')
+# summary(smoke_step_down)
+# plot(smoke_step_down)
 ```
 
-Using drop down methods we conclude age has no significance. We select Gestation and smoker parameters. \## Question 2f)
+Using drop down methods we conclude age has no significance. We select Gestation and smoker parameters.
+
+## Question 2f)
+
+f)  To investigate the effect of the predictors on the baby weight, apply a logistic regression model (no interactions). Interpret the results in terms of odds, comment, compare to e).
 
 ## Question 2g)
 
+g)  Investigate the interaction of predictor *Gestation* with *smoker*, and the interaction of *Gestation* with *mage35* (one interaction at a time). From this and f), choose a resulting model.
+
 ## Question 2h)
 
+h)  For the resulting model from g), estimate the probability of low baby weight for each combination of levels of the involved factors and the gestation of 40 weeks.
+
 ## Question 2i)
+
+i)  Another approach to address the questions in e) would be to apply a contingency table test. Implement the relevant test(s). Is this approach wrong? Name both an advantage and a disadvantage of this approach as compared to the one from f).
