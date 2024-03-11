@@ -5,9 +5,19 @@ output:
   pdf_document:
     toc: no
 ---
+```{r,message=FALSE, warning=FALSE, include=FALSE}
+options(digits=3)
+library(dplyr)
+library(ggplot2)
+library(car)
+library(corrplot)
+library(glmnet)
+color_choice <- "Dark2"
+```
+
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.width=8, fig.height=2)
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
 ```
 
 ```{r child = 'Exercise 1.Rmd'}

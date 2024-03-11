@@ -7,17 +7,6 @@ output:
   html_document: default
 ---
 
-```{r}
-options(digits=2)
-
-library(dplyr)
-library(ggplot2)
-library(car)
-library(corrplot)
-library(glmnet)
-color_choice <- "Dark2"
-```
-
 # Exercise 2
 
 ```{r}
@@ -75,74 +64,62 @@ corrplot(cor_matrix,
 ## Question 2b)
 
 ```{r}
-x <- MASS::stepAIC(model_full, direction="backward")
-summary(x)
-```
-
-```{r}
 # step_down_model <- step(model, direction = 'backward')
 model <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mheight + mppwt + fage + fedyrs + fnocig + fheight,
     data = data
 )
-summary(model)
 # remove fage
 model_1 <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mheight + mppwt + fedyrs + fnocig + fheight,
     data = data
 )
-summary(model_1)
 # remove mheight
 model_2 <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mppwt + fedyrs + fnocig + fheight,
     data = data
 )
-summary(model_2)
 # remove fedyrs
 model_3 <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mppwt + fnocig + fheight,
     data = data
 )
-summary(model_3)
 # remove fnocig as it's not significant and Adjusted R-squared is comparable
 model_4 <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mppwt + fheight,
     data = data
 )
-summary(model_4)
 
 # remove mnocig as it's not significant and Adjusted R-squared is comparable
 model_5 <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mppwt + fheight,
     data = data
 )
-summary(model_5)
 
 # remove length as it's not significant and Adjusted R-squared is comparable
 model_6 <- lm(
     Birthweight ~ Headcirc + Gestation + mage + mppwt + fheight,
     data = data
 )
-summary(model_6)
+
 # remove fheight as it's not significant and Adjusted R-squared is comparable
 model_7 <- lm(
     Birthweight ~ Headcirc + Gestation + mage + mppwt,
     data = data
 )
-summary(model_7)
+
 # remove mage as it's not significant and Adjusted R-squared is comparable
 model_8 <- lm(
     Birthweight ~ Headcirc + Gestation + mppwt,
     data = data
 )
-summary(model_8)
+
 
 # remove mppwt as it's not significant and Adjusted R-squared is comparable
 step_down_model <- lm(
     Birthweight ~ Headcirc + Gestation,
     data = data
 )
-summary(step_down_model)
 ```
 
 -   Tests below are done for the model assumption..
@@ -155,6 +132,7 @@ abline(h = 0, col = "red")
 qqnorm(residuals(step_down_model))
 qqline(residuals(step_down_model))
 ```
+
 ## Question 2c)
 
 ```{r}
@@ -170,6 +148,8 @@ ci; pi
 ```
 
 ## Question 2d)
+
+In order to asses accuracy of LASSO method we create training and testing data sets. Then we use training data to fit the model using LASSO method (alpha = 1) and then determine optimal lambda value by performing cross-validation. We then compare resulting MSE values to determine if model is better than the one obtained by step-down method.
 
 ```{r}
 x <- subset(data, select = -Birthweight)
@@ -206,6 +186,8 @@ coef(lasso_cv, s= lasso_cv$lambda.1se)
 
 mse_lm; mse1_lasso; mse2_lasso
 ```
+
+After running experiment multiple times we determine that step-down model performs better with average MSE value of 0.15 compared to LASSO model with lambda = lambda.1se which had average MSE value of 0.2.
 
 ## Question 2e)
 
