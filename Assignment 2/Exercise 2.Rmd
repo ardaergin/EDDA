@@ -45,12 +45,12 @@ These plots reveal
 plot(model_full)[1]
 
 # 
-resid_ordered <- order(abs(residuals(model)))
+resid_ordered <- order(abs(residuals(model_full)))
 u = rep(0,length(resid_ordered))
 u[length(resid_ordered)] = 1
 # 
-cooks.distance(model)
-plot(cooks.distance(model), type="b")
+cooks.distance(model_full)
+plot(cooks.distance(model_full), type="b")
 
 #forbeslm_42 = lm(y~x+u11); summary(forbeslm11)
 ```
@@ -80,7 +80,7 @@ summary(x)
 ```
 
 ```{r}
-#step_down_model <- step(model, direction = 'backward')
+# step_down_model <- step(model, direction = 'backward')
 model <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mheight + mppwt + fage + fedyrs + fnocig + fheight,
     data = data
@@ -92,52 +92,52 @@ model_1 <- lm(
     data = data
 )
 summary(model_1)
-#remove mheight
+# remove mheight
 model_2 <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mppwt + fedyrs + fnocig + fheight,
     data = data
 )
 summary(model_2)
-#remove fedyrs
+# remove fedyrs
 model_3 <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mppwt + fnocig + fheight,
     data = data
 )
 summary(model_3)
-#remove fnocig
+# remove fnocig as it's not significant and Adjusted R-squared is comparable
 model_4 <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mppwt + fheight,
     data = data
 )
 summary(model_4)
 
-#remove mnocig
+# remove mnocig as it's not significant and Adjusted R-squared is comparable
 model_5 <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mppwt + fheight,
     data = data
 )
 summary(model_5)
 
-#remove length
+# remove length as it's not significant and Adjusted R-squared is comparable
 model_6 <- lm(
     Birthweight ~ Headcirc + Gestation + mage + mppwt + fheight,
     data = data
 )
 summary(model_6)
-#remove fheight
+# remove fheight as it's not significant and Adjusted R-squared is comparable
 model_7 <- lm(
     Birthweight ~ Headcirc + Gestation + mage + mppwt,
     data = data
 )
 summary(model_7)
-#remove mage
+# remove mage as it's not significant and Adjusted R-squared is comparable
 model_8 <- lm(
     Birthweight ~ Headcirc + Gestation + mppwt,
     data = data
 )
 summary(model_8)
 
-#remove mppwt
+# remove mppwt as it's not significant and Adjusted R-squared is comparable
 step_down_model <- lm(
     Birthweight ~ Headcirc + Gestation,
     data = data
@@ -145,6 +145,16 @@ step_down_model <- lm(
 summary(step_down_model)
 ```
 
+-   Tests below are done for the model assumption..
+
+```{r}
+# linearity
+plot(predict(step_down_model), residuals(step_down_model), xlab = "Fitted values", ylab = "Residuals")
+abline(h = 0, col = "red")
+# normality of residuals
+qqnorm(residuals(step_down_model))
+qqline(residuals(step_down_model))
+```
 ## Question 2c)
 
 ```{r}
