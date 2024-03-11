@@ -22,48 +22,26 @@ model_full <- lm(Birthweight ~ ., data = data)
 In order to investigate "the problem of potential and influence points", we can first take a look at the diagnostic plots.
 
 ```{r}
+par(mfrow=c(2,2))
+plot(model_full, which=1)
+plot(model_full, which=2)
 plot(model_full, which=4)
 plot(model_full, which=5)
-plot(model_full, which=6)
 ```
 
-These plots reveal
-
-```{r}
-# par(mfrow=c(2,2))
-plot(model_full)[1]
-
-# 
-resid_ordered <- order(abs(residuals(model_full)))
-u = rep(0,length(resid_ordered))
-u[length(resid_ordered)] = 1
-# 
-cooks.distance(model_full)
-plot(cooks.distance(model_full), type="b")
-
-#forbeslm_42 = lm(y~x+u11); summary(forbeslm11)
-```
+Overall, both based on **Cook's distance** plots reveal that cases $20$, $24$, and $28$ appear to be potential outliers.
 
 **Investigating multi-collinearity**:
-
 ```{r}
 car::vif(model_full)
 ```
 
-When we look into `car::vif()`, if we follow the rule of thumb, we see that no variable has a VIF value that is higher than $5$. Hence, we do not seem to have any issues regarding multi-collinearity.
+When we look into `car::vif()`, if we follow the rule of thumb of "VIF values should be lower than $5$", we can see that the variables of `fage` and `mage` appears to be a cause for concern regarding multi-collinearity. The other variables do not seem to have an issue.
 
-```{r}
-# Calculate correlation matrix
-cor_matrix <- cor(data[, -c(1,3)]) # Exclude response variable Birthweight
-
-# Plot the correlation matrix
-corrplot(cor_matrix, 
-         method = "circle", type = "upper", tl.col = "black", tl.cex = 0.6)
-```
 
 ## Question 2b)
 
-```{r}
+```{r, include = FALSE}
 # step_down_model <- step(model, direction = 'backward')
 model <- lm(
     Birthweight ~ Length + Headcirc + Gestation + mage + mnocig + mheight + mppwt + fage + fedyrs + fnocig + fheight,
@@ -122,19 +100,22 @@ step_down_model <- lm(
 )
 ```
 
--   Tests below are done for the model assumption..
-
+We have followed the procedure for the **step down method** (code omitted for length reasons). We started with the full model, and one by one removed the variable with the largest $p$-value if $p > 0.05$. Removal order: `fage`, `mheight`, `fedyrs`, `fnocig`, `mnocig`, `length`, `fheight`, `mage`, `mppwt`. The final model we end up with is the following:
 ```{r}
-# linearity
-plot(predict(step_down_model), residuals(step_down_model), xlab = "Fitted values", ylab = "Residuals")
-abline(h = 0, col = "red")
-# normality of residuals
-qqnorm(residuals(step_down_model))
-qqline(residuals(step_down_model))
+step_down_model <- lm(Birthweight ~ Headcirc + Gestation, data = data)
+```
+
+For this model, we have checked the model **assumptions**. First, we can check the assumption of **linearity** through creating scatterplots for $(x,y)$ variable combinations. The scatterplots show that both of the IVs have a linear relationship with the `Birthweight` DV. 
+```{r}
+pairs(~Birthweight + Headcirc + Gestation, data = data)
+```
+
+We can further check the **normality of the errors** through the diagnostic plots. The "Residuals vs. Fitted" plot shows that the errors seem to be equally distributed across the fitted values, and it does not look like there is a clear violation of the assumption.
+```{r}
+plot(step_down_model, which=1)
 ```
 
 ## Question 2c)
-
 ```{r}
 head_mean <- mean(data$Gestation)
 gest_mean <- mean(data$Headcirc)
