@@ -7,7 +7,7 @@ output:
   html_document: default
 ---
 
-```{}
+```         
 ```
 
 # Exercise 1
@@ -28,7 +28,7 @@ In addition to adding a `loglongevity` column through log-transforming the `long
 
 ## Question 1a)
 
-```{r}
+```{r, fig.align='center', out.width='3in'}
 # Summary
 data_summary <- data %>% group_by(Activity) %>% summarise(
     Mean_loglongevity = mean(loglongevity), SE_loglongevity = sd(loglongevity) / sqrt(n()),
@@ -79,7 +79,7 @@ For the "isolated" activity condition (derived from the intercept), the longevit
 
 ## Question 1c)
 
-```{r}
+```{r, fig.align='center',out.width='3in'}
 data %>% ggplot(aes(x = thorax, y = loglongevity, color = Activity)) + 
   geom_point() + geom_smooth(method = "lm", se = TRUE) +
   labs(x = "Thorax Length", y = "Log-Longevity", color = "Condition",

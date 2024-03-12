@@ -4,6 +4,11 @@ author: "Adam Sulak, Onder Akacik, Arda Ergin"
 output: 
   pdf_document:
     toc: no
+header-includes:
+  - \usepackage{fancyvrb}
+  - \RecustomVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\scriptsize}
+  - \RecustomVerbatimCommand{\VerbatimInput}{VerbatimInput}{fontsize=\scriptsize}
+  - \AtBeginEnvironment{Highlighting}{\scriptsize}
 ---
 ```{r,message=FALSE, warning=FALSE, include=FALSE}
 options(digits=3)
@@ -17,7 +22,7 @@ color_choice <- "Dark2"
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4, fig.show='hold')
 ```
 
 ```{r child = 'Exercise 1.Rmd'}
