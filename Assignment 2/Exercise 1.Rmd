@@ -6,11 +6,7 @@ output:
   html_document: default
 ---
 
-```         
-```
-
 # Exercise 1
-
 ```{r}
 data_raw <- read.table("fruitflies.txt", header = TRUE)
 ```
@@ -25,8 +21,8 @@ data <- subset(data_raw, select = -c(activity))
 
 In addition to adding a `loglongevity` column through log-transforming the `longevity` variable, we have also properly factorized the `activity` variable. In the raw data set, "low" category was the baseline with $0$, however it made more sense to have the "isolated" category as a baseline comparison with the categories "low" and "high".
 
-## Question 1a)
 
+## Question 1a)
 ```{r, fig.align='center', out.width='3in'}
 # Summary
 data_summary <- data %>% group_by(Activity) %>% summarise(
@@ -45,7 +41,6 @@ data_summary %>% ggplot(aes(x = Activity, y = Mean_loglongevity, fill = Activity
 ```
 
 Considering our main interest is the condition variable of `activity`, which is a categorical variable, we have decided to use a bar plot to visualize the data. When looking at the bar plot with the confidence intervals, we can see that the individuals in the "high" activity condition, on average, seems to be living shorter lives compared to both "isolated" and "low" activity conditions. However, we can see that the difference between "isolated" and "low" activity conditions seem to be relatively little, probably not significant. The estimated longevity can be found by looking at the means for all groups: $4.12$ (isolated), $4.00$ (low), $3.60$ (high).
-
 ```{r}
 model_simple <- lm(loglongevity ~ Activity, data = data)
 results_model <- anova(model_simple)
@@ -56,8 +51,8 @@ The appropriate statistical test here is a **one-way ANOVA**. The results of thi
 
 Post-hoc analyses using `summary()` shows that while the "high" activity condition significantly differed from the baseline "isolated" condition, $t(72) = -5.95$, $p < .001$, there appears to be no significant difference between the "low" activity condition and the baseline "isolated" condition, $t(72) = -1.38$, $p = 0.17$. These results are in line with the visualization in the bar plot.
 
-## Question 1b)
 
+## Question 1b)
 ```{r}
 model_with_cov <- lm(loglongevity ~ Activity + thorax, data = data)
 model_comparison <- anova(model_simple, model_with_cov)
@@ -67,7 +62,6 @@ results_cov <- anova(model_with_cov)
 When we include the `thorax` variable in our model as a covariate, and run a model comparison with just `activity` condition as our predictor, we can see that the addition of the covariate of thorax length to the model results in a significant improvement, $F(1, 71) = 94.4$, $p < .001$.
 
 We can further see this when we run an **ANCOVA** with thorax length, finding that the effect of thorax length on longevity is significant, $F(1, 71) = 94.4$, $p < .001$, alongside the effect of activity $F(2, 71) = 44.6$, $p < .001$.
-
 ```{r}
 model_with_cov$coefficients
 ```
@@ -76,8 +70,8 @@ When we investigate the `lm()` output, we can see the estimated longevities for 
 
 For the "isolated" activity condition (derived from the intercept), the longevity is $1.629 + 2.979 = 4.6$, for "low" activity condition $-0.124 + 2.979 = 2.855$, and "high" activity condition $-0.410 + 2.979 = 2.569$.
 
-## Question 1c)
 
+## Question 1c)
 ```{r, fig.align='center',out.width='3in'}
 data %>% ggplot(aes(x = thorax, y = loglongevity, color = Activity)) + 
   geom_point() + geom_smooth(method = "lm", se = TRUE) +
@@ -98,12 +92,12 @@ results_interact <- anova(model_with_interact)
 
 The analysis results show that `activity:thorax` interaction is not significant, $F(2,69) = 1.93$, $p = 0.15$. Hence, we can conclude that this influence of thorax length on longevity is similar under all three conditions of sexual activity.
 
-## Question 1d)
 
+## Question 1d)
 There is no 'wrong analysis' per se in the beginning. However, once we find thatthorax length was a significant factor, the correct thing to do is to include it in our model. Considering the model comparison, the model with the covariate is significantly more explanatory than the model without the covariate. Hence, thorax length significantly explains some part of the variance in the data, we should be including it in the model. Although we should not include the interaction term, as it is not significant.
 
-## Question 1e)
 
+## Question 1e)
 ```{r}
 model_with_cov_nolog = lm(longevity ~ Activity+thorax, data = data)
 results_new <- anova(model_with_cov_nolog)
@@ -112,14 +106,12 @@ results_new <- anova(model_with_cov_nolog)
 When we use "the number of days as the response, rather than its logarithm", there seems to be no difference in the results of our model, as both of the factors remain significant.
 
 However, we need to consider the nature of the data and the model assumptions when deciding whether it is appropriate to long-transform a variable. Log-transformation makes sense when we have skewed data that violates normality, we have an issue with heteroskedasticity, or that we have issues in regards to outliers.
-
 ```{r}
 par(mfrow = c(1,2))
 hist(data$longevity);hist(data$loglongevity)
 ```
 
 When we investigate the histograms, it actually appears that the log-transformation skews the actually normally distributed variable, which is not a good thing considering ANOVA is relatively sensitive to normality violations.
-
 ```{r}
 par(mfrow = c(1,2))
 plot(model_with_cov_nolog, which = 1)

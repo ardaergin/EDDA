@@ -7,37 +7,33 @@ output:
 ---
 
 # Exercise 2
-
 ```{r}
 data <- read.csv("Birthweight.csv")
 ```
 
 ## Question 2a)
-
 ```{r}
 model_full <- lm(Birthweight ~ ., data = data)
 ```
 
 In order to investigate "the problem of potential and influence points", we can first take a look at the diagnostic plots.
-
 ```{r}
 par(mfrow=c(1,2))
 plot(model_full, which=4)
 plot(model_full, which=5)
 ```
 
-Overall, both based on **Cook's distance** plots reveal that cases $20$, $24$, and $28$ appear to be potential outliers.
+Overall, both based on **Cook's distance** plots reveal that cases $20$, $24$, and $28$ appear to be potential outliers. 
 
 **Investigating multi-collinearity**:
-
 ```{r}
 car::vif(model_full)
 ```
 
 When we look into `car::vif()`, if we follow the rule of thumb of "VIF values should be lower than $5$", we can see that the variables of `fage` and `mage` appears to be a cause for concern regarding multi-collinearity. The other variables do not seem to have an issue.
 
-## Question 2b)
 
+## Question 2b)
 ```{r, include = FALSE}
 # step_down_model <- step(model, direction = 'backward')
 model <- lm(
@@ -98,25 +94,22 @@ step_down_model <- lm(
 ```
 
 We have followed the procedure for the **step down method** (code omitted for length reasons). We started with the full model, and one by one removed the variable with the largest $p$-value if $p > 0.05$. Removal order: `fage`, `mheight`, `fedyrs`, `fnocig`, `mnocig`, `length`, `fheight`, `mage`, `mppwt`. The final model we end up with is the following:
-
 ```{r}
 step_down_model <- lm(Birthweight ~ Headcirc + Gestation, data = data)
 ```
 
 For this model, we have checked the model **assumptions**. First, we can check the assumption of **linearity** through creating scatterplots for $(x,y)$ variable combinations. The scatterplots show that both of the IVs have a linear relationship with the `Birthweight` DV.
-
 ```{r}
 pairs(~Birthweight + Headcirc + Gestation, data = data)
 ```
 
 We can further check the **normality of the errors** through the diagnostic plots. The "Residuals vs. Fitted" plot shows that the errors seem to be equally distributed across the fitted values, and it does not look like there is a clear violation of the assumption.
-
 ```{r, fig.align='center', out.width='3in'}
 plot(step_down_model, which=1)
 ```
 
-## Question 2c)
 
+## Question 2c)
 ```{r}
 head_mean <- mean(data$Gestation)
 gest_mean <- mean(data$Headcirc)
@@ -129,10 +122,9 @@ pi <- predict(step_down_model, newdata = df, interval = 'prediction')
 ci; pi
 ```
 
+
 ## Question 2d)
-
 In order to asses accuracy of LASSO method we create training and testing data sets. Then we use training data to fit the model using LASSO method (alpha = 1) and then determine optimal lambda value by performing cross-validation. We then compare resulting MSE values to determine if model is better than the one obtained by step-down method.
-
 ```{r,fig.align='center', out.width='7in'}
 par(mfrow=c(1,3))
 x <- subset(data, select = -Birthweight)
@@ -172,8 +164,8 @@ mse_lm; mse1_lasso; mse2_lasso
 
 After running experiment multiple times we determine that step-down model performs better with average MSE value of 0.15 compared to LASSO model with lambda = lambda.1se which had average MSE value of 0.2.
 
-## Question 2e)
 
+## Question 2e)
 ```{r}
 data_new <- data[,c("lowbwt","Gestation","smoker","mage35")]
 data_new$Gestation <- as.numeric(data_new$Gestation)
@@ -218,8 +210,8 @@ Based on the crosstabs and the bar plot:\
 - **Within the smoker mothers**, age of the mother seems to influence low birth weight: compared to smoker mothers that are younger than $35$, smoker mothers that are $35$ or older seem to have a higher proportion of Low Birth Weight in babies.\
 - **Within the non-smoker mothers**, age of the mother does not seem to influence low birth weight: there appears to be no difference between non-smoker mothers that are younger than $35$ and non-smoker mothers that are $35$ or older in Low Birth Weight in babies (since the difference in proportions of $0.05$ and $0$ seem negligible). - If we aggregate over `smoker` variable in crosstabs, we can see that there seems to be a difference between the proportions of $0.13$ (under $35$ y.o.) and $0.25$ (over $35$ y.o.). Yet, we need further testing to see whether this difference is actually significant. Although, considering the above points, it is possible that there is a `smoker*mage35` interaction.
 
-## Question 2f)
 
+## Question 2f)
 ```{r}
 model_glm_0 <- stats::glm(lowbwt ~ 1, family=binomial("logit"), data=data_new)
 model_glm_smoker <- stats::glm(lowbwt ~ smoker, family=binomial("logit"), data=data_new)
@@ -243,8 +235,8 @@ Although, it needs to be noted that the predictor of `smoker` is very close to s
 
 When we investigate the **odds**, we can take the exponential of the coefficients in the model. The results of the models show that the odds of having a low birth weight baby for smoker mothers are about 5.6 times the odds for non-smoker mothers. And, the odds of having a low birth weight baby for mothers older than $35$ are about 2.2 times the odds for mothers younger than $35$. Although, as stated above, neither of these predictors seem to be significant with the default alpha level of $0.05$.
 
-## Question 2g)
 
+## Question 2g)
 Investigate the interaction of predictor *Gestation* with *smoker*, and the interaction of *Gestation* with *mage35* (one interaction at a time). From this and f), choose a resulting model.
 
 ```{r}
@@ -267,13 +259,11 @@ We can see that the `smoker*Gestation` model is significantly better than just h
 To note, running this `glm` model gives a `Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred`. Upon some research, we have discovered that this warning means that the model almost perfectly predict the outcome variable. We interpret this as a good sign.
 
 However, we need to consider that the model improvement for `lowbwt ~ smoker * Gestation` might simply depend on the near-significant effect (see our answer for 2f) of `smoker` as a predictor. So, we can further test this by running a Chi-square test for the interaction model.
-
 ```{r}
 results <- anova(model_glm_int_smoker, test = "Chisq")
 ```
 
 We can see that the interaction term `smoker:Gestation` is not significant, $p = 0.198$. We also further confirm this result through a model comparison with `smoker + Gestation` and `smoker*Gestation`:
-
 ```{r}
 model_glm_noint_smoker <- stats::glm(lowbwt ~ smoker + Gestation, family=binomial("logit"), data=data_new)
 anova(model_glm_noint_smoker, model_glm_int_smoker, test = "Chisq")
@@ -281,8 +271,8 @@ anova(model_glm_noint_smoker, model_glm_int_smoker, test = "Chisq")
 
 Hence, even though `smoker` variable is nearly non-significant, due to the model comparison results, we choose our final model as `lowbwt ~ smoker + Gestation`.
 
-## Question 2h)
 
+## Question 2h)
 ```{r}
 new_data <- data.frame(Gestation = 40, smoker = factor(c("No", "Yes"), levels = c("No", "Yes")))
 probabilities <- predict(model_glm_noint_smoker, newdata = new_data, type = "response")
@@ -291,8 +281,8 @@ print(new_data)
 
 ```
 
-## Question 2i)
 
+## Question 2i)
 ```{r}
 ## Chi-squared test for smoking mothers
 smoker_table <- table(data_new$smoker, data_new$lowbwt)
