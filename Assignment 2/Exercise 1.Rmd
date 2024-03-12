@@ -1,7 +1,6 @@
 ---
 title: "Exercise 1"
 author: "Adam Sulak, Onder Akacik, Arda Ergin"
-date: "2024-02-22"
 output:
   pdf_document: default
   html_document: default
