@@ -3,55 +3,86 @@ title: "Exercise 1"
 author: "Adam Sulak, Onder Akacik, Arda Ergin"
 date: "2024-02-22"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
+```{r}
+source("../Packages.R")
+```
 
 # Exercise 1
 
-## Question 1a)
-```{r, echo=FALSE}
+```{r}
 data <- read.table("./Ice_cream-1.csv", header = TRUE, sep = ",")
 ```
 
-After loading `Ice_cream-1.csv`, we first check the **"normality assumption"**. The Normal QQ-plot, density plot, and the histogram indicate that there does not seem to be a serious deviation from normal distribution. The box plot indicate that there seems to be no serious outliers.
+## Question 1a)
+
+Make some relevant plots of this sample:
 ```{r}
 par(mfrow = c(1,2))
 hist(data$video,main = "Histogram of Video Game Scores", xlab = "Video Game Scores")
 qqnorm(data$video)
 par(mfrow = c(1,2))
-boxplot(data$video); plot(density(data$video))
+boxplot(data$video); plot(ecdf(data$video))
 ```
+
+To check the **"normality assumption"**, we can look at the Normal QQ-plot directly. We can also look at the histogram and the density plot for checking normality. From the Normal QQ-plot, we can derive that there does not seem to be a serious deviation from normal distribution.
+
+The box plot gives us information about the symmetry, range, and outliers. The two halves of the box are approximately equal in size, and the median is roughly in the middle of the box (although leaning a bit to the higher values). Thus, our distribution appears to be symmetric. There also appears to be no serious outliers.
 
 Next we calculate **$97\%$ confidence interval** for the video data:
 ```{r}
 mu <- mean(data$video); n <- length(data$video)
 sd_sample <- sd(data$video); sem <- sd_sample / sqrt(n)
-z_score <- qnorm(1 - 0.015); margin_error <- z_score * sem
+z_score <- qnorm(1 - ((1-0.97)/2)); margin_error <- z_score * sem
 lower_bound <- mu - margin_error; upper_bound <- mu + margin_error
 ```
 
-Hence, in our given sample, the average video game score is `r round(mu,2)` ($SD$ = `r round(sd_sample,2)`), 97%-CI [`r round(lower_bound,2)`, `r round(upper_bound,2)`]. Then, for the next task:
+Hence, in our given sample, the average video game score is `r round(mu,2)` ($SD$ = `r round(sd_sample,2)`), 97%-CI [`r round(lower_bound,2)`, `r round(upper_bound,2)`]. 
+
+Then, to calculate:
 ```{r}
-n_min = (z_score^2) * (sd_sample^2) / (1.5^2)
+E = 3; n_min = (z_score^2) * (sd_sample^2) / ((E/2)^2)
 ```
 
 Given our sample $SD$ and chosen CI, the "*sample size needed to provide that the length of the 97%-CI is at most 3*" is `r n_min`.          
 
 For the next task, we calculate the confidence interval using **bootstrapping**. We take $1000$ bootstrap samples to get a good approximation.
+
 ```{r}
-bootstrap_CI <- function(x, b_count){
-  bootstrap_stat <- numeric(1000)
-  for (i in 1:b_count) {
-      bootstrap_sample <- sample(x, replace=TRUE)
-      bootstrap_stat[i] <- mean(bootstrap_sample)
-  }
-  cat("97%-CI Bootstrap Confidence Interval: \n")
-  print(quantile(bootstrap_stat, c(0.015, 0.985)))
-  par(mfrow=c(1,2)); hist(bootstrap_stat); boxplot(bootstrap_stat)
+bootstrap_CI <- function(
+	x,
+	C_level = 0.95, 
+	n_bootstrap = 1000){
+	
+	bootstrap_stat <- numeric(n_bootstrap)
+
+	# Loop for Bootstrap Distribution
+	for (i in 1:n_bootstrap) {
+		bootstrap_sample <- sample(
+			x, replace=TRUE)
+			bootstrap_stat[i] <- mean(
+			  bootstrap_sample)
+	}
+	# Visualizing the Bootstrap Distribution
+	par(mfrow=c(1,2))
+	hist(bootstrap_stat)
+	boxplot(bootstrap_stat)
+	
+	# CI
+	UpLow = c(
+		(1-C_level)/2, 
+		(1+C_level)/2)
+	Boot_CI = quantile(
+		bootstrap_stat, 
+		UpLow)
+	
+	cat("97%-CI Bootstrap Confidence Interval: \n")
+	return(Boot_CI)
 }
-bootstrap_CI(data$video, 1000)
+bootstrap_CI(data$video, 0.97, 1000)
 ```
 
 
@@ -88,7 +119,7 @@ We conducted a **Sign Test** (or Exact Binomial Test) to test whether the median
 
 We conducted a **Wilcoxon Signed-rank Test** to test, through matched pairs, whether the median for the video game scores in our sample is significantly greater than $50$ (or $51$), with $H_0 : \text{median(VG-scores)} = 50$ and $H_1 : \text{median(VG-scores)} > 50$. The results of the Wilcoxon Signed-rank Test was significant, $V = 9835.5$, $p < 0.01$. Hence, we can reject the $H_0$, and take it as a support that the median video game score for our sample is greater than $50$. Yet, similar with the one-sample t-test results, when we take $H_0 : \text{median(VG-scores)} = 51$ and $H_1 : \text{median(VG-scores)} > 51$, the results were not significant $V = 11024$, $p = 0.07$. Hence, we cannot reject $H_0$ when $H_0 : \text{median(VG-scores)} = 51$. 
 
-The underlying reason for these differences between the t-test, Sign Test, and Wilcoxon Test can be attributed to the differences in how these tests operate and the assumptions they make. While t-test is a parametric test, Sign Test and Wilcoxon Test are non-parametric, and they do not assume normality. Although, it needs to be noted that the Wilcoxon Test has a symmetry assumption (since it considers "ranks on both sides" of the distribution), making it more sensitive compared to the the Sign Test. In our case, these differences resulted in t-test and Wilcoxon Test giving the same hypothesis testing results, but the Sign Test not giving similar results and making a tougher hypothesis testing as both $H_0$ could not be rejected
+The underlying reason for these differences between the t-test, Sign Test, and Wilcoxon Test can be attributed to the differences in how these tests operate and the assumptions they make. While t-test is a parametric test, Sign Test and Wilcoxon Test are non-parametric, and they do not assume normality. Although, it needs to be noted that the Wilcoxon Test has a symmetry assumption (since it considers "ranks on both sides" of the distribution), making it more sensitive compared to the the Sign Test. In our case, these differences resulted in t-test and Wilcoxon Test giving the same hypothesis testing results, but the Sign Test not giving similar results and making a tougher hypothesis testing as both $H_0$ could not be rejected.
 
 ```{r}
 #wilcox_25_result <- wilcox.test(data$video, mu=42, alternative = 'less')
@@ -105,22 +136,62 @@ We performed the Sign Test with modified parameters to check if the video game s
 
 ## Question 1d)
 ```{r}
-set.seed(14)
 bootstrap_test <- function(
-    n = 200, b_count = 1000, mu, test = 26){
-  bootstrap_stat <- numeric(n)
-  for (i in 1:b_count) {
-      bootstrap_sample <- rnorm(n = n, mean = mu, sd = 10)
-      bootstrap_stat[i] <- min(bootstrap_sample)
-  }
+    x, 
+    n_bootstrap = 1000, 
+    mu, # The mean under the null hypothesis
+    sd, # standard deviation
+    method = "min"
+    ){
   
-  pl = sum(bootstrap_stat < test) / b_count
-  pr = sum(bootstrap_stat > test) / b_count
-  p_value = 2 * min(pl, pr)
-  return(p_value)
+  sample_size <- length(x)
+	bootstrap_stat <- numeric(n_bootstrap)
+
+	for (i in 1:n_bootstrap) {
+	  
+	  bootstrap_sample <- rnorm(
+			n = sample_size, 
+			mean = mu, 
+			sd = sd)
+			
+		# Compute the test statistic for the bootstrap sample based on the method	
+		if(method == "min"){
+			bootstrap_stat[i] <- 
+				min(bootstrap_sample)
+		} else if(method == "max"){
+			bootstrap_stat[i] <- 
+				max(bootstrap_sample)
+		} else if(method == "mean"){
+			bootstrap_stat[i] <- 
+				mean(bootstrap_sample)
+		}
+	}
+	
+	test_statistic <- 
+		if(method == "min"){min(x)} 
+		else if(method == "max"){max(x)} 
+		else if(method == "mean"){mean(x)}
+	
+	pl <- sum(
+		bootstrap_stat <= test_statistic)/
+		n_bootstrap
+	pr <- sum(
+		bootstrap_stat >= test_statistic)/
+		n_bootstrap
+	p_value <- 2 * min(pl, pr)
+	return(p_value)
 }
-p = numeric(100); for(i in 1:100){p[i] = bootstrap_test(mu = i)}
-x = (1:100)[p > 0.05]; print(x)
+
+p_values = numeric(100)
+
+for(i in 1:100){
+	p_values[i] = bootstrap_test(
+		x = data$video,
+		mu = i,
+		sd = 10)
+}
+x = (1:100)[p_values > 0.05]
+print(x)
 ```
 
 When we do the bootstrap test, we see that the interval we are looking for is `r min(x)` to `r max(x)`. For these hypotheses, $H_0$ is not rejected. We are not exactly sure what is meant by "this situation", but, if we are talking about the overall video game score data, one can argue that the video game score variable is not "continuous" enough to perform the Kolmogorov-Smirnov test, as the KS test depend on the data being continuous, not discrete.
@@ -128,39 +199,105 @@ When we do the bootstrap test, we see that the interval we are looking for is `r
 
 ## Question 1e)
 
-Since we know that sample comes from normal distribution two sample t test is a most suitable test to perform. We also perform Wilcoxon and Kolmogorov-Smirnov test and explain below the caveats.
 ```{r}
-vid_female <- data$video[data$female==1]
-vid_male <- data$video[data$female==0]
+data_female <- data %>% filter(female == 1)
+data_male <- data %>% filter(female == 0)
+```
 
-mf_t_result <- t.test(vid_male, vid_female, alternative = 'greater')
-mf_wilcox_result <- wilcox.test(vid_male, vid_female, alternative = 'greater')
-mf_ks_result <- ks.test(vid_male, vid_female, alternative = 'greater')
+```{r}
+mf_t_result <- t.test(
+  data_male$video, data_female$video, alternative = 'greater')
+mf_wilcox_result <- wilcox.test(
+  data_male$video, data_female$video, alternative = 'greater')
+mf_ks_result <- ks.test(
+  data_male$video, data_female$video, alternative = 'less')
 
 mf_t_result; mf_wilcox_result; mf_ks_result
 ```
 
-Wilcoxon test compares medians of two samples not means, however it can still give us a good idea about the differences between samples.
+The claim that we want to test is that "*the mean score on the video game for the male students is higher than for the female students*". Considering this claim:        
+- Among the three tests, **t-test** is the only statistical test that **directly tests** the difference between the means of the two groups.        
+- **Mann-Whitney Test** does not test the means directly. Under the assumption of similar distribution shapes, a significant result can suggest a difference in medians, which, depending on the shape of the distributions, might support the claim about means, but only **indirectly**.       
+- **Kolmogorov-Smirnov Test** is more about distributional differences than specific parameters like the mean or median. Considering our experts claim, this test is not necessarily appropriate to conduct. It would be less direct in addressing the expert's claim about mean scores unless the distributional shift is due to a shift in the mean. If the distributions differ significantly, and it is due to the central tendency, then it might **indirectly** support the claim.        
 
-Kolmogorov-Smirnov test is used to check if two samples come from the same distribution or if one sample comes from normal distribution, here our goal is to check if mean of one sample is higher than a mean of a second sample which means KS test is incorrect test to perform.
+Considering the claim we want the test, t-test is the most appropriate test to conduct, given that no assumptions are violated. The two-sample t-test assumes that both groups are normally distributed, so we should check that.
 
-## Question 1f)
-
-We run Pearson correlation test.
-
-```{r fig.height=5}
-video_puzzle <- data[c('video', 'puzzle')]
-cor_result <- round(cor(video_puzzle), 3)
-pairs(video_puzzle)
-cor_test_result <- cor.test(video_puzzle$video, video_puzzle$puzzle)
-t_result <- t.test(
-    video_puzzle$puzzle,
-    video_puzzle$video,
-    alternative = 'greater',
-    paired = TRUE
-)
-
-cor_result; t_result
+```{r}
+par(mfrow = c(1,2))
+qqnorm(data_male$video, main = "Male"); qqnorm(data_female$video, main = "Female")
 ```
 
-Given the p-value of 0.232, which is greater than the suggested significance level of 0.05, we do **not have sufficient evidence to reject the null hypothesis**. Therefore, we **fail to support the alternative hypothesis.**
+The Q-Q plots suggest that both groups are roughly normally distributed. And, we know that $N = 91$ for males and $N = 109$ for females are large enough sample sizes nonetheless. Hence, we can conduct a t-test for ease.    
+
+If we had a violation of the normality assumption, **the next best test would be the Mann-Whitney U Test**. It is the most common non-parametric alternative to two-sample t-test, and is often used when normality assumptions are violated. It assesses whether the ranks of the combined data from the two groups are randomly distributed between them. It assesses whether the ranks of the combined data from the two groups are randomly distributed between them. If the two distributions have the same shape, then the Mann-Whitney U test is indeed a test on the medians. More generally, it tests whether one distribution tends to have higher or lower values than the other, which is a question of stochastic dominance, not specifically about the medians or means.       
+
+The **Kolmogorov-Smirnov (K-S) Test** would be more informative if we were interested in differences in the overall shape of the distributions beyond location shifts (like differences in variance, skewness, or the presence of outliers). It compares the entire cumulative distribution functions (CDFs) of the two samples to detect all types of differences in distribution, not just differences in central tendency.       
+- If the question of interest is whether the two samples come from the exact same distribution (not just whether they have the same central tendency), then the K-S test is appropriate as it tests for equality of distributions.        
+- If our hypothesis was about the distributions themselves (e.g., one sample has a heavier tail than the other), the K-S test is more directly applicable.        
+
+Even though t-test is indeed the most appropriate, **Permutation Test** is also equally appropriate to do. 
+- It does not assume any specific distribution and is a non-parametric method. It's particularly useful when you have doubts about the distributional assumptions required for parametric tests.       
+- The permutation test is definitely applicable as it relies on the data itself to generate the distribution of the test statistic under the null hypothesis. It's especially appropriate if the sample sizes are not large and/or you suspect that the distribution of scores is non-normal.        
+- It can directly test the expert's claim by using the difference in means as the test statistic. It would shuffle the group labels (female or male) for the scores and determine if the observed difference in means is significantly greater than what would be expected by chance.       
+
+## Question 1f)
+Here, both of our variables are continuous, and, therefore, we have an "interest is in a possible dependence between the two outcomes per unit". We can either use **Pearson's r** or **Spearman's p**, based on whether both of the variables follow a normal distribution. Hence, we should check that before starting the analysis.
+
+```{r}
+par(mfrow = c(2,2))
+qqnorm(data$video); qqnorm(data$puzzle)
+hist(data$video); hist(data$puzzle)
+```
+
+The Q-Q plot for video suggest that the data is normally distributed, but it appears that we can doubt the normality of the distribution for the `puzzle` variable. The histograms also suggest that the data is skewed to the right quite a bit. We can follow-up on these doubts with conducting a **Shapiro-Wilk test**. 
+
+```{r}
+stats::shapiro.test(data$puzzle)
+```
+
+Even though this test is prone to false negatives, there is not much reason for concern in false positives. Hence, if we get a p-value that is significant, it heavily indicates that we have a non-normal distribution, and that is the situation in our case. Based on this assesment, we need to conduct **Spearman's rank correlation test (Spearman's p)**, as it is a non-parametric alternative to Pearson's r, and it does not assume normality.
+
+```{r}
+stats::cor.test(data$video, data$puzzle, method="spearman")
+```
+
+Small note: "*There is a warning about ties, which means that some values occur multiple times in weight and/or systolic. Therefore R uses an approximation for the p-value.*"       
+
+The results of our analysis shows that there is a significant a moderate positive correlation between `video` and `puzzle` variables, $r_{s}(198) = .48$, $p < .001$. This suggests that higher scores in video games are associated with better puzzle-solving abilities.
+
+We can further visualize this:
+```{r}
+data %>% ggplot(aes(x=video, y=puzzle)) + geom_point()
+```
+
+Considering we have two continuous variables, and they are paired for every participant, we can do a **paired-samples t-test**, **wilcoxon signed-rank test**, or **sign test**. Because we know that one of our variables are non-normally distributed, we cannot do a paired-samples t-test, as the normality assumption is violated.       
+
+For **wilcoxon signed-rank test**, even though we do not have an assumption regarding normality, we do have an assumption regarding symmetry of the distribution. In this case, we assume that the distribution of the difference between `video` and `puzzle` variables is symmetric. We can check this visually: 
+```{r}
+differences <- data$puzzle - data$video
+hist(differences,breaks = 50)
+```
+
+From the visual inspection, the data does not seem to be perfectly symmetric, as there appears to be more values below the peak (which is around -5 to 5), than there are above. Yet, there does not seem to be a massive violation of the symmetry assumption. Still, if we want to be safe, it is also good to conduct a sign test alongside wilcoxon signed-rank test.         
+
+Since we want to assess "*whether the score on the puzzle is higher than the score on the video game*", it seems more appropriate to conduct wilcoxon signed-rank test, as it also takes into account the magnitude of the differences, and this is not available in sign test. The Wilcoxon signed-rank test a more informative choice for this context."
+
+**Wilcoxon Signed-Rank Test**:
+```{r}
+# a one-tailed test where we expect 'puzzle' to be higher
+wilcox.test(data$puzzle, data$video, paired = TRUE, alternative = "greater")
+```
+
+**Sign Test**:
+```{r}
+differences <- data$puzzle - data$video
+num_positive <- sum(differences > 0)
+num_negative <- sum(differences < 0)
+binom.test(
+  x = num_positive, 
+  n = num_positive + num_negative, 
+  p = 0.5, alternative = "greater")
+```
+
+The results of the both tests show that the score on the puzzle is not significantly higher than the score on the video game.
+
