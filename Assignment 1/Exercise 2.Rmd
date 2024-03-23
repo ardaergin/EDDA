@@ -3,11 +3,11 @@ title: "Exercise 2"
 author: "Adam Sulak, Onder Akacik, Arda Ergin"
 date: "2024-02-22"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
-```{r,echo=FALSE}
+```{r,message=FALSE,echo=FALSE}
 source("../Packages.R")
 ```
 

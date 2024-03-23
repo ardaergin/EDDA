@@ -1,13 +1,14 @@
 ---
 title: "Assignment 1"
 author: "Adam Sulak, Onder Akacik, Arda Ergin"
-output: 
+output:
+  rmdformats::robobook:
   pdf_document:
     toc: no
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.width=8, fig.height=2)
+# knitr::opts_chunk$set(echo = TRUE, fig.width=8, fig.height=2)
 ```
 
 ```{r child = 'Exercise 1.Rmd'}

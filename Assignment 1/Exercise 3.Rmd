@@ -3,9 +3,14 @@ title: "Exercise 3"
 author: "Adam Sulak, Onder Akacik, Arda Ergin"
 date: "2024-02-22"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
+
+```{r,message=FALSE,echo=FALSE}
+source("../Packages.R")
+```
+
 # Exercise 3
 ```{r}
 data <- read.table("cream.txt", header = TRUE)
@@ -19,7 +24,7 @@ data$position <- factor(data$position)
 data$starter <- factor(data$starter)
 
 model <- stats::lm(acidity ~ batch + position + starter, data = data)
-# summary(model)
+summary(model)
 ```
 
 The comparison category for the model is `starter = 1`. Hence, the `starter2` table essentially gives us whether there is a "*significant difference between the effects of starter 1 and starter 2 on acidity*". And the results of the analysis shows that, there is no significant difference between the two $t(12) = -0.321$, $p = 0.7534$, on their effect on acidity. This is also the case for starter 2, 3, and 5.
@@ -34,7 +39,7 @@ The results of the ANOVA show that `position` variable does not have a significa
 ```{r}
 model_reduced <- stats::lm(acidity ~ batch + starter, data = data)
 anova(model_reduced)
-# summary(model_reduced)
+summary(model_reduced)
 ```
 
 In this reduced model, we see that the `batch` variable have a significant effect on acidity, $F(4,16) = 8.44$, $p < .001$, as well as the `starter` variable, $F(4,16) = 19.83$, $p < .001$. When we further investigate the model summary, we can see that `starter4` significantly differs from `starter1` on its effect on acidity, $t(16) = 5.96$, $p < .001$. The other starters do not have a significant differ from `starter1`.
@@ -53,8 +58,8 @@ Similar to the ANOVA results, the results of the Friedman Rank Sum Test also sho
 ## Question 3d)
 ```{r}
 lme4::lmer(acidity ~ starter + (1|batch), data = data)
-# summary(lmerTest::lmer(acidity ~ starter + (1|batch), data = data))
-# anova(lmerTest::lmer(acidity ~ starter + (1|batch), data = data))
+summary(lmerTest::lmer(acidity ~ starter + (1|batch), data = data))
+anova(lmerTest::lmer(acidity ~ starter + (1|batch), data = data))
 ```
 
 Here, in this model, we register `batch` as a "random effect". Here, through `(1|batch)`, we specify that we are allowing the intercept to vary across batches, by including a random intercept for each level of batch (as we indicate with `1`). This, in return, allows us to account for variability that is not of main interest (as, our main interest is the `starter`) but should be accounted for in the model.

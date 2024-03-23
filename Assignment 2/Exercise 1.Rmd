@@ -6,6 +6,11 @@ output:
   html_document: default
 ---
 
+```{r}
+source("../Packages.R")
+```
+
+
 # Exercise 1
 ```{r}
 data_raw <- read.table("fruitflies.txt", header = TRUE)

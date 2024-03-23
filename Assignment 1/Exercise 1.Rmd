@@ -7,7 +7,7 @@ output:
   pdf_document: default
 ---
 
-```{r}
+```{r, message=FALSE,echo=FALSE}
 source("../Packages.R")
 ```
 
