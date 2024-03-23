@@ -7,60 +7,59 @@ output:
   html_document: default
 ---
 
+```{r,echo=FALSE}
+source("../Packages.R")
+```
+
 # Exercise 2
-
-## Question A)
-
 ```{r}
-# Load data
-hemoglobin_data <- read.table("hemoglobin-1.txt", header = TRUE)
-
-# Define the factors and their levels
-rates <- unique(hemoglobin_data$rate) # Rates 1 to 4
-methods <- unique(hemoglobin_data$method)   # Methods A and B
-
-# Create all combinations of rate and method
-combinations <- expand.grid(rate = rates, method = methods)
-
-# Assign fishes to each combination
-set.seed(123) # For reproducibility
-fish_ids <- 1:nrow(hemoglobin_data)
-assignments <- sample(fish_ids, length(fish_ids), replace = FALSE)
-combinations$fish_ids <- split(assignments,
-    f = rep(1:nrow(combinations),
-    each = length(assignments)/nrow(combinations))
-)
-
-# View the assignments
-print(combinations)
-print(combinations$fish_ids)
-
+data <- read.table("hemoglobin-1.txt", header = TRUE)
 ```
 
-## Question B)
-
-rate is statistically significant. method and the interaction effect are not statistically significant.
-
+## Question 2a)
 ```{r}
-
-attach(hemoglobin_data)
-par(mfrow=c(1,4))
-interaction.plot(method, rate, hemoglobin)
-interaction.plot(rate, method, hemoglobin)
-boxplot(hemoglobin~rate)
-boxplot(hemoglobin~method)
-detach(hemoglobin_data)
-
-hemoglobin_data$rate <- as.factor(hemoglobin_data$rate)
-hemoglobin_data$method <- as.factor(hemoglobin_data$method)
-
-anova_result <- anova(lm(hemoglobin ~ rate * method, data = hemoglobin_data))
-anova_result
-
-
+# Initializing the DF with an ID column
+mock_data <- as.data.frame(matrix(1:80,80)); colnames(mock_data) <- "ID"
+# Randomizing 8 experimental groups (since it is a 2x4 design) 
+mock_data$condition <- sample(rep(1:8, 10), replace=F)
+# Creating the two conditions
+mock_data <- mock_data %>% dplyr::mutate(
+  method = factor(
+    case_when(
+      condition <= 4 ~ 0,
+      TRUE ~ 1),
+    levels = 0:1,
+    labels = c("A","B"))) %>% dplyr::mutate(
+  rates = factor(
+    case_when(
+      condition <= 4 ~ as.numeric(condition)-1,
+      condition >= 5 ~ as.numeric(condition)-5),
+    levels = 0:3,
+    labels = c("0mg","5mg","10mg","15mg")))
 ```
 
-## Question C)
+
+## Question 2b)
+
+First, **factorizing** the variables:
+```{r}
+data$method <- factor(data$method)
+data$rate <- factor(
+  data$rate,
+  levels = 1:4,
+  labels = c("0mg","5mg","10mg","15mg"), ordered=T)
+```
+
+**Modelling and Two-way ANOVA**:
+```{r}
+model <- lm(hemoglobin ~ method*rate, data = data)
+anova(model)
+```
+
+The results of the ANOVA shows that while the `rate` variable has a significant main effect on hemoglobin levels, $F(3, 72) = 19.47$, $p < 0.001$, the main effect of `method` variable on hemoglobin levels is not significant, $F(1, 72) = 1.56$, $p = 0.22$. The `method:rate` interaction is also not significant, $F(3, 72) = 1.05$, $p = 0.38$.
+
+
+## Question 1c)
 
 The **rate** of sulfamerazine has the greatest influence on hemoglobin levels among two that were tested. It has a statistically significant effect. This question is a good starting point for understanding the effects of different variables on a response.
 
