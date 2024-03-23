@@ -59,67 +59,111 @@ anova(model)
 The results of the ANOVA shows that while the `rate` variable has a significant main effect on hemoglobin levels, $F(3, 72) = 19.47$, $p < 0.001$, the main effect of `method` variable on hemoglobin levels is not significant, $F(1, 72) = 1.56$, $p = 0.22$. The `method:rate` interaction is also not significant, $F(3, 72) = 1.05$, $p = 0.38$.
 
 
-## Question 1c)
+## Question 2c)
 
-The **rate** of sulfamerazine has the greatest influence on hemoglobin levels among two that were tested. It has a statistically significant effect. This question is a good starting point for understanding the effects of different variables on a response.
+"*Which of the two factors has the greatest influence? Is this a good question?*"   
+- Considering that we have found `rate` to be significant and `method` to be not significant in their effect on hemoglobin levels, we can say that `rate` has the greatest influence.   
+- Although, for us to properly compare the effect of factors, it makes more sense to do an additive model makes more sense, as the interaction term messes with the effects a little. So, to better know which factor is more influential, we need to run the additive model, not the model with the interaction term included.       
 
+**The Additive Model**:
 ```{r}
-# additive model
-anova_result <- anova(lm(hemoglobin ~ rate + method, data = hemoglobin_data))
-anova_result
-
+model_add <- lm(hemoglobin ~ method + rate, data = data)
+anova(model_add)
 ```
 
-Combination: **rate:2** and **method:B** yielded the highest hemoglobin.
+For the additive model, we find the same results, with `rate` to be significant and `method` to be not significant.    
 
-**Mean value** for **rate:3** and **method:A** can be used as the **estimate** of that combination, which leads to the value of **9.03**.
-
-**Rate 2** leads to the highest mean hemoglobin as it can be seen from the printed sorted means per combination. **Rate 3** is the second and **Rate 4** is the third and **Rate 1** is the fourth.
-
+**Getting Data Summaries**:
 ```{r}
-mean_hemoglobin_by_combination <- aggregate(
-    hemoglobin ~ rate + method,
-    data = hemoglobin_data,
-    FUN = mean
-)
+data_summary_FULL <- data %>%
+  group_by(method, rate) %>%
+  summarise(
+    mean_dv = mean(hemoglobin, na.rm = TRUE),
+    median_dv = median(hemoglobin, na.rm = TRUE),
+    min_dv = min(hemoglobin, na.rm = TRUE),
+    max_dv = max(hemoglobin, na.rm = TRUE),
+    sd_dv = sd(hemoglobin, na.rm = TRUE),
+    n = n(),
+    .groups = 'drop'
+  )
+data_summary_FULL
 
-sorted_means <- mean_hemoglobin_by_combination[order(-mean_hemoglobin_by_combination$hemoglobin), ]
+data_summary_ONLY_rate <- data %>%
+  group_by(rate) %>%
+  summarise(
+    mean_dv = mean(hemoglobin, na.rm = TRUE),
+    median_dv = median(hemoglobin, na.rm = TRUE),
+    min_dv = min(hemoglobin, na.rm = TRUE),
+    max_dv = max(hemoglobin, na.rm = TRUE),
+    sd_dv = sd(hemoglobin, na.rm = TRUE),
+    n = n(),
+    .groups = 'drop'
+  )
+data_summary_ONLY_rate
+```
+"*Which combination of rate and method yield the highest hemoglobin?*"        
+- If "highest" is meant to indicate the observed maximum value, then, that would be the combination of `rate = '5mg'` and `method = 'B'`, with a maximum hemoglobin level of $11.7$.   
+- If "highest" is meant to indicate the observed mean, then, that would be the combination of `rate = '5mg'` and `method = 'B'`, with a mean hemoglobin level of $10.14$.    
+"*Estimate the mean hemoglobin value for rate 3 by using method A.*"    
+- With the combination of `rate = '10mg'` and `method = 'A'`, we observe a mean hemoglobin level of $9.03$.   
+"*What rate leads to the highest mean hemoglobin?*"        
+- If we collapse over the method, the rate leads to the highest mean hemoglobin is `rate = 5mg`. 
 
-print(sorted_means)
 
+## Question 2d)
+
+**The Rate-only Model**:
+```{r}
+model_rate <- lm(hemoglobin ~ rate, data = data)
+summary(model_rate)
 ```
 
-## Question D)
+The results of the one-way ANOVA shows that there is a significant effect of `rate` on hemoglobin levels, $F(3, 76) = 19.3$, $p < 0.001$. This indicates that not all group means are equal, and that at least one group differs significantly in mean hemoglobin levels compared to others.   
+- `rate=0mg` has an estimated hemoglobin level of $6.97$      
+- `rate=5mg`	has an estimated hemoglobin level of $9.73$     
+- `rate=10mg`	has an estimated hemoglobin level of $9.38$	    
+- `rate=15mg`	has an estimated hemoglobin level of $8.86$     
 
-Performing this test is useful to understand the effect of the rate variable alone on hemoglobin levels, but it's important to remember that ignoring other variables (like the method in this case) might oversimplify the model and overlook potential interaction effects.
-
-The rate of sulfamerazine does have a significant effect on hemoglobin levels, so the **null hypothesis is rejected.**
-
-Estimated hemoglobin values for each rate are **Rate1 6.975, Rate2 9.735, Rate3 9.380, and Rate4 8.855**. Performing this test is useful to understand the effect of the rate variable alone on hemoglobin levels, but it's important to remember that ignoring other variables (like the method in this case) might oversimplify the model and overlook potential interaction effects.
-
+We can further visualize these
 ```{r}
-
-hemoglobin_data$rate <- as.factor(hemoglobin_data$rate)
-
-anova_result_one_way <- anova(lm(hemoglobin ~ rate, data = hemoglobin_data))
-print(anova_result_one_way)
-
-mean_hemoglobin_by_rate <- aggregate(
-    hemoglobin ~ rate,
-    data = hemoglobin_data,
-    FUN = mean
-)
-print(mean_hemoglobin_by_rate)
-
+boxplot(hemoglobin~rate,data = data)
 ```
 
-## Question E)
 
-A non-parametric alternative to one-way ANOVA is Kruskal-Wallis test. We run the test with command below to to compare output with results from section D.
+Performing one-way ANOVA with `rate`, while omitting the non-significant `method`, is useful to understand the effect of the rate variable alone on hemoglobin levels. It provides simplicity and parsimony: a simpler model is easier to interpret and communicate. If a variable does not significantly contribute to explaining the variance in the dependent variable, excluding it can make the model more parsimonious.       
 
+Even though, it is usually fine to omit non-significant variables from the model, one can also argue that since we have manipulated `method`, it is good practice to include it in the model even when it is non-significant. If a variable is directly related to our hypotheses, it might be worth including in the model regardless of its statistical significance.       
+
+For exploratory analyses or when prioritizing model parsimony, omitting non-significant variables might be justified. However, for confirmatory analyses, especially in well-designed experiments where variables are manipulated based on theoretical reasoning, it's generally advisable to include all manipulated variables to fully understand the experimental effects and interactions, even if some do not reach statistical significance.   
+
+Also, we can check whether the model was appropriate through testing the **model assumptions**. 
 ```{r}
-kruskal_result <- kruskal.test(hemoglobin_data$hemoglobin, hemoglobin_data$rate)
-print(kruskal_result)
+par(mfrow = c(1,2))
+plot(model_rate, which = 1)
+plot(model_rate, which = 2)
 ```
 
-The results of Kruskal-Wallis test are consistent with those from section D. We clearly see that hemoglobin levels are affected by the rate factor. The p-value is equal to 1.777e-07 which mean **Null hypothesis is rejected** again.
+Looking at the **Q-Q plot**, we can see that the points largely follow the diagonal line. But, we also see that there are some deviations at the ends. We can see a slight "S" shape. And, regarding the **Residuals vs. Fitted plot**, we see that there is a quite a large gap in data points between $7$ until around $8.7$. Additionally, in both plots, we see the existence of some outliers. These issues do not seem to be major, however, considering that we have a sample size with $N = 20$ for each group, it might actually be a better idea to do a non-parametric test. Since both the issues with non-normality, as well as the outliers pose a larger problem when the sample size is small.       
+
+Additionally, it is important to note that `rate` and `hemoglobin` might have **an inverse quadratic relationship**.     
+
+When we input `rate` as an **ordered factor** into the linear model, we can see that the quadratic model `rate.Q` is significant, $t =  -5.87$, $p < .001$. We can further observe this pattern on the boxplot. We can even further test this with a model comparison:
+```{r}
+data$numeric_rate <- (as.numeric(data$rate)-1) * 5 
+linearModel <- lm(hemoglobin ~ numeric_rate, data = data)
+quadraticModel <- lm(hemoglobin ~ numeric_rate + I(numeric_rate^2), data = data)
+anova(linearModel, quadraticModel)
+```
+
+It is unclear whether a non-parametric Kruskal-Wallis would help this quadratic-relationship situation, but considering the above points, it might be a good idea to try other tests.    
+
+
+## Question 2e)
+
+The non-parametric alternative of One-way ANOVA is **Kruskal-Wallis test**:
+```{r}
+kruskal.test(hemoglobin ~ rate, data = data)
+```
+
+The results of the Kruskal-Wallis test test also shows that `rate` has a significant effect on hemoglobin levels, $\chi^2(3) = 34$, $p < .001$.
+
